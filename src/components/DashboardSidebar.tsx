@@ -1,5 +1,4 @@
 // components/DashboardSidebar.tsx
-// components/DashboardSidebar.tsx
 'use client';
 
 import { JSX, useState } from 'react';
@@ -23,6 +22,7 @@ import Link from 'next/link';
 export default function DashboardSidebar() {
     const [openManagement, setOpenManagement] = useState(false);
     const [openHotel, setOpenHotel] = useState(false);
+    const [openBus, setOpenBus] = useState(false);
     const [openSettings, setOpenSettings] = useState(false);
 
     return (
@@ -55,6 +55,7 @@ export default function DashboardSidebar() {
                     <SidebarSubItem href="/dashboard/profile" label="Profile" />
                     <SidebarSubItem href="/dashboard/preferences" label="Preferences" />
                 </SidebarGroup>
+
                 {/* Hotel Room Management Group */}
                 <SidebarGroup
                     label="Hotel Room Management"
@@ -63,12 +64,12 @@ export default function DashboardSidebar() {
                     toggle={() => setOpenHotel(!openHotel)}
                 >
                     <SidebarSubItem
-                        href="/dashboard/hotel/add-room"
+                        href="/dashboard/hotel/add"
                         label="Add New Room"
                         icon={<BedDouble size={16} />}
                     />
                     <SidebarSubItem
-                        href="/dashboard/hotel/room-list"
+                        href="/dashboard/hotel/list"
                         label="Room List"
                         icon={<List size={16} />}
                     />
@@ -79,6 +80,35 @@ export default function DashboardSidebar() {
                     />
                     <SidebarSubItem
                         href="/dashboard/hotel/payments"
+                        label="View Payments"
+                        icon={<CreditCard size={16} />}
+                    />
+                </SidebarGroup>
+
+                {/* Bus Tickets Management Group */}
+                <SidebarGroup
+                    label="Bus Tickets Management"
+                    icon={<Folder size={20} />}
+                    open={openBus}
+                    toggle={() => setOpenBus(!openBus)}
+                >
+                    <SidebarSubItem
+                        href="/dashboard/bus/add-ticket"
+                        label="Add New Agency"
+                        icon={<BedDouble size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/agency/list"
+                        label="Agency List"
+                        icon={<List size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/bus/booking"
+                        label="Ticket Booking"
+                        icon={<CalendarCheck size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/bus/payments"
                         label="View Payments"
                         icon={<CreditCard size={16} />}
                     />

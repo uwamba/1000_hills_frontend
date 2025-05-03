@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 
 interface Hotel {
@@ -7,8 +8,10 @@ interface Hotel {
   address: string;
   description: string;
   stars: number;
-  working_time: string;
   status: string;
+  updated_by: number | null;
+  deleted_by: number | null;
+  deleted_on: string | null;
 }
 
 export default function HotelListPage() {
@@ -19,11 +22,14 @@ export default function HotelListPage() {
     const fetchHotels = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels`);
-        if (!res.ok) throw new Error('Network response was not ok');
-        const data = await res.json();
+        if (!res.ok) throw new Error('Failed to fetch hotels');
+        
+        const json = await res.json();
+        const data: Hotel[] = json.data || []; // Adjust if your API returns data differently
+        
         setHotels(data);
       } catch (error) {
-        console.error('Failed to fetch hotels:', error);
+        console.error('Error fetching hotels:', error);
       } finally {
         setLoading(false);
       }
@@ -33,11 +39,13 @@ export default function HotelListPage() {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-50">
+    <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6">Hotel List</h1>
 
       {loading ? (
         <div className="text-center text-lg text-gray-600">Loading hotels...</div>
+      ) : hotels.length === 0 ? (
+        <div className="text-center text-lg text-gray-500">No hotels found.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {hotels.map((hotel) => (
@@ -48,12 +56,21 @@ export default function HotelListPage() {
               <h2 className="text-2xl font-semibold text-indigo-600">{hotel.name}</h2>
               <p className="text-md text-gray-500">{hotel.address}</p>
               <p className="text-gray-700 mt-4">{hotel.description}</p>
-              <div className="mt-4 text-sm text-gray-600">
-                <span className="font-medium">⭐ Stars:</span> {hotel.stars} |{' '}
-                <span className="font-medium">🕒 Working Time:</span> {hotel.working_time} |{' '}
-                <span className={`font-medium ${hotel.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
-                  Status: {hotel.status}
-                </span>
+              <p className="text-gray-600 mt-2">Stars: {hotel.stars}</p>
+
+              <div className="mt-4 text-sm text-gray-600 space-y-1">
+                <div>
+                  <span className="font-medium">Status:</span>{' '}
+                  <span className={hotel.status === 'active' ? 'text-green-600' : 'text-red-600'}>
+                    {hotel.status}
+                  </span>
+                </div>
+                {hotel.deleted_on && (
+                  <div className="text-red-500">
+                    <span className="font-medium">Deleted On:</span>{' '}
+                    {new Date(hotel.deleted_on).toLocaleDateString()}
+                  </div>
+                )}
               </div>
             </div>
           ))}
