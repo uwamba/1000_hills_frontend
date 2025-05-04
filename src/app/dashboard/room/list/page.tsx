@@ -7,48 +7,48 @@ interface Photo {
   path: string;
 }
 
-interface Hotel {
+interface Room {
   id: number;
   name: string;
-  address: string;
+  price: number;
+  capacity: number;
   description: string;
-  stars: number;
   status: string | null;
   deleted_on: string | null;
   photos: Photo[];
 }
 
-interface HotelResponse {
+interface RoomResponse {
   current_page: number;
   last_page: number;
-  data: Hotel[];
+  data: Room[];
 }
 
-export default function HotelListPage() {
-  const [hotels, setHotels] = useState<Hotel[]>([]);
+export default function RoomListPage() {
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
-  const fetchHotels = async (page: number) => {
+  const fetchRooms = async (page: number) => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels?page=${page}`);
-      if (!res.ok) throw new Error('Failed to fetch hotels');
-      const json: HotelResponse = await res.json();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms?page=${page}`);
+      if (!res.ok) throw new Error('Failed to fetch rooms');
+      const json: RoomResponse = await res.json();
 
-      setHotels(json.data);
+      setRooms(json.data);
       setPage(json.current_page);
       setLastPage(json.last_page);
     } catch (error) {
-      console.error('Error fetching hotels:', error);
+      console.error('Error fetching rooms:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchHotels(page);
+    fetchRooms(page);
   }, [page]);
 
   const handlePrev = () => {
@@ -63,47 +63,47 @@ export default function HotelListPage() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-6">Hotel List</h1>
+      <h1 className="text-3xl font-extrabold text-gray-900 mb-6">Room List</h1>
 
       {loading ? (
-        <div className="text-center text-lg text-gray-600">Loading hotels...</div>
-      ) : hotels.length === 0 ? (
-        <div className="text-center text-lg text-gray-500">No hotels found.</div>
+        <div className="text-center text-lg text-gray-600">Loading rooms...</div>
+      ) : rooms.length === 0 ? (
+        <div className="text-center text-lg text-gray-500">No rooms found.</div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {hotels.map((hotel) => (
+            {rooms.map((room) => (
               <div
-                key={hotel.id}
+                key={room.id}
                 className="bg-white rounded-lg shadow-lg p-4 border border-gray-300 hover:shadow-2xl transition-transform transform hover:scale-105"
               >
                 <div className="w-full h-48 mb-4 overflow-hidden rounded-lg">
                   <img
                     src={
-                      hotel.photos.length > 0
-                        ? `${imageBaseUrl}/${hotel.photos[0].path}`
+                      room.photos.length > 0
+                        ? `${imageBaseUrl}/${room.photos[0].path}`
                         : '/placeholder.jpg'
                     }
-                    alt={hotel.name}
+                    alt={room.name}
                     className="object-cover w-full h-full"
                   />
                 </div>
-                <h2 className="text-xl font-semibold text-indigo-600">{hotel.name}</h2>
-                <p className="text-md text-gray-500">{hotel.address}</p>
-                <p className="text-gray-700 mt-2">{hotel.description}</p>
-                <p className="text-gray-600 mt-1">Stars: {hotel.stars}</p>
+                <h2 className="text-xl font-semibold text-indigo-600">{room.name}</h2>
+                <p className="text-gray-700 mt-2">{room.description}</p>
+                <p className="text-gray-600 mt-1">Price: ${room.price}</p>
+                <p className="text-gray-600 mt-1">Capacity: {room.capacity} people</p>
 
                 <div className="mt-2 text-sm text-gray-600 space-y-1">
                   <div>
                     <span className="font-medium">Status:</span>{' '}
-                    <span className={hotel.status === 'active' ? 'text-green-600' : 'text-red-600'}>
-                      {hotel.status || 'N/A'}
+                    <span className={room.status === 'available' ? 'text-green-600' : 'text-red-600'}>
+                      {room.status || 'N/A'}
                     </span>
                   </div>
-                  {hotel.deleted_on && (
+                  {room.deleted_on && (
                     <div className="text-red-500">
                       <span className="font-medium">Deleted On:</span>{' '}
-                      {new Date(hotel.deleted_on).toLocaleDateString()}
+                      {new Date(room.deleted_on).toLocaleDateString()}
                     </div>
                   )}
                 </div>

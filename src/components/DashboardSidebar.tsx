@@ -22,6 +22,7 @@ import Link from 'next/link';
 export default function DashboardSidebar() {
     const [openManagement, setOpenManagement] = useState(false);
     const [openHotel, setOpenHotel] = useState(false);
+    const [openRoom, setOpenRoom] = useState(false);
     const [openBus, setOpenBus] = useState(false);
     const [openSettings, setOpenSettings] = useState(false);
 
@@ -58,31 +59,50 @@ export default function DashboardSidebar() {
 
                 {/* Hotel Room Management Group */}
                 <SidebarGroup
-                    label="Hotel Room Management"
+                    label="Hotel Management"
                     icon={<Folder size={20} />}
                     open={openHotel}
                     toggle={() => setOpenHotel(!openHotel)}
                 >
                     <SidebarSubItem
                         href="/dashboard/hotel/add"
-                        label="Add New Room"
+                        label="Add New Hotel"
                         icon={<BedDouble size={16} />}
                     />
                     <SidebarSubItem
                         href="/dashboard/hotel/list"
-                        label="Room List"
+                        label="Hotel List"
+                        icon={<List size={16} />}
+                    />
+    
+                </SidebarGroup>
+                <SidebarGroup
+                    label="Hotel Room Management"
+                    icon={<Folder size={20} />}
+                    open={openRoom}
+                    toggle={() => setOpenRoom(!openRoom)}
+                >
+                    <SidebarSubItem
+                        href="/dashboard/room/add"
+                        label="Add New Room"
+                        icon={<BedDouble size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/room/list"
+                        label="Hotel Room List"
                         icon={<List size={16} />}
                     />
                     <SidebarSubItem
-                        href="/dashboard/hotel/room-booking"
-                        label="Room Booking"
-                        icon={<CalendarCheck size={16} />}
+                        href="/dashboard/room/list"
+                        label="Hotel Room Payment"
+                        icon={<List size={16} />}
                     />
                     <SidebarSubItem
-                        href="/dashboard/hotel/payments"
-                        label="View Payments"
-                        icon={<CreditCard size={16} />}
+                        href="/dashboard/hotel/list"
+                        label="Hotel Room Booking"
+                        icon={<List size={16} />}
                     />
+    
                 </SidebarGroup>
 
                 {/* Bus Tickets Management Group */}
