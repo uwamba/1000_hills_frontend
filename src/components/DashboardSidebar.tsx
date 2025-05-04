@@ -1,4 +1,3 @@
-// components/DashboardSidebar.tsx
 'use client';
 
 import { JSX, useState } from 'react';
@@ -24,10 +23,11 @@ export default function DashboardSidebar() {
     const [openHotel, setOpenHotel] = useState(false);
     const [openRoom, setOpenRoom] = useState(false);
     const [openBus, setOpenBus] = useState(false);
+    const [openApartments, setOpenApartments] = useState(false);  // State for Apartments Management
     const [openSettings, setOpenSettings] = useState(false);
 
     return (
-        <aside className="w-64 bg-gray-900 text-white p-4 space-y-6">
+        <aside className="w-64 h-screen overflow-y-auto bg-gray-900 text-white p-4 space-y-6">
             <div className="text-2xl font-bold mb-6">🌟 Dashboard</div>
 
             <nav className="space-y-3">
@@ -57,7 +57,7 @@ export default function DashboardSidebar() {
                     <SidebarSubItem href="/dashboard/preferences" label="Preferences" />
                 </SidebarGroup>
 
-                {/* Hotel Room Management Group */}
+                {/* Hotel Management Group */}
                 <SidebarGroup
                     label="Hotel Management"
                     icon={<Folder size={20} />}
@@ -74,8 +74,38 @@ export default function DashboardSidebar() {
                         label="Hotel List"
                         icon={<List size={16} />}
                     />
-    
                 </SidebarGroup>
+
+                {/* Apartments Management Group */}
+                <SidebarGroup
+                    label="Apartments Management"  // New Apartments Management Group
+                    icon={<BedDouble size={20} />}
+                    open={openApartments}
+                    toggle={() => setOpenApartments(!openApartments)}
+                >
+                    <SidebarSubItem
+                        href="/dashboard/apartment/add"
+                        label="Add New Apartment"
+                        icon={<BedDouble size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/apartment/list"
+                        label="Apartment List"
+                        icon={<List size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/apartment/booking"
+                        label="Apartment Booking"
+                        icon={<CalendarCheck size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/apartment/payment"
+                        label="Apartment Payment"
+                        icon={<CreditCard size={16} />}
+                    />
+                </SidebarGroup>
+
+                {/* Hotel Room Management Group */}
                 <SidebarGroup
                     label="Hotel Room Management"
                     icon={<Folder size={20} />}
@@ -93,27 +123,26 @@ export default function DashboardSidebar() {
                         icon={<List size={16} />}
                     />
                     <SidebarSubItem
-                        href="/dashboard/room/list"
+                        href="/dashboard/room/payment"
                         label="Hotel Room Payment"
                         icon={<List size={16} />}
                     />
                     <SidebarSubItem
-                        href="/dashboard/hotel/list"
+                        href="/dashboard/room/booking"
                         label="Hotel Room Booking"
                         icon={<List size={16} />}
                     />
-    
                 </SidebarGroup>
 
                 {/* Bus Tickets Management Group */}
                 <SidebarGroup
-                    label="Bus Tickets Management"
+                    label="Bus Agency Management"
                     icon={<Folder size={20} />}
                     open={openBus}
                     toggle={() => setOpenBus(!openBus)}
                 >
                     <SidebarSubItem
-                        href="/dashboard/bus/add-ticket"
+                        href="/dashboard/agency/add"
                         label="Add New Agency"
                         icon={<BedDouble size={16} />}
                     />
@@ -123,13 +152,23 @@ export default function DashboardSidebar() {
                         icon={<List size={16} />}
                     />
                     <SidebarSubItem
-                        href="/dashboard/bus/booking"
-                        label="Ticket Booking"
+                        href="/dashboard/bus/add"
+                        label="Add new bus"
                         icon={<CalendarCheck size={16} />}
                     />
                     <SidebarSubItem
-                        href="/dashboard/bus/payments"
-                        label="View Payments"
+                        href="/dashboard/bus/list"
+                        label="Bus list"
+                        icon={<CreditCard size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/bus/booking"
+                        label="Bus Booking"
+                        icon={<CalendarCheck size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/bus/payment"
+                        label="View payments"
                         icon={<CreditCard size={16} />}
                     />
                 </SidebarGroup>
