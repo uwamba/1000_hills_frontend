@@ -33,9 +33,12 @@ export default function ApartmentForm() {
 
   const [photos, setPhotos] = useState<File[]>([]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type, checked } = e.target;
-
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const target = e.target;
+    const { name, value, type } = target;
+  
     if (name === 'lat' || name === 'lng') {
       setFormData((prevData) => ({
         ...prevData,
@@ -44,10 +47,10 @@ export default function ApartmentForm() {
           [name]: value,
         },
       }));
-    } else if (type === 'checkbox') {
+    } else if (type === 'checkbox' && target instanceof HTMLInputElement) {
       setFormData((prevData) => ({
         ...prevData,
-        [name]: checked,
+        [name]: target.checked,
       }));
     } else if (name === 'number_of_bedroom' || name === 'number_of_floor') {
       setFormData((prevData) => ({
@@ -61,6 +64,7 @@ export default function ApartmentForm() {
       }));
     }
   };
+  
 
   const handlePhotoChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -270,24 +274,24 @@ export default function ApartmentForm() {
 
       {/* Photo Upload Section */}
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-800 mb-2">Photos</label>
-
-        <div className="space-y-2">
-          {photos.map((_, index) => (
-            <input
-              key={index}
-              type="file"
-              accept="image/*"
-              name="photos"
-              multiple
-              onChange={(e) => handlePhotoChange(index, e)}
-              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
-                         file:rounded file:border-0 file:text-sm file:font-semibold
-                         file:bg-blue-50 file:text-blue-700
-                         hover:file:bg-blue-100 border border-gray-300 rounded"
-            />
-          ))}
-        </div>
+      <label className="block text-sm font-medium text-gray-800 mb-2">Photos</label>
+  
+      <div className="space-y-2">
+        {photos.map((_, index) => (
+          <input
+            key={index}
+            type="file"
+            accept="image/*"
+            name="photos"
+            multiple
+            onChange={(e) => handlePhotoChange(index, e)}
+            className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+                       file:rounded file:border-0 file:text-sm file:font-semibold
+                       file:bg-blue-50 file:text-blue-700
+                       hover:file:bg-blue-100 border border-gray-300 rounded"
+          />
+        ))}
+      </div>
 
         <button
           type="button"

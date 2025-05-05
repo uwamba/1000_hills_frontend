@@ -1,6 +1,11 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from 'react';
+
+interface Photo {
+  id: number;
+  path: string;
+}
 
 interface Apartment {
   id: number;
@@ -12,6 +17,7 @@ interface Apartment {
   number_of_floor: number;
   status: string | null;
   deleted_on: string | null;
+  photos: Photo[];
 }
 
 interface ApartmentResponse {
@@ -55,6 +61,8 @@ export default function ApartmentListPage() {
     if (page < lastPage) setPage(page + 1);
   };
 
+  const imageBaseUrl = 'http://127.0.0.1:8000/storage';
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6">Apartment List</h1>
@@ -71,12 +79,23 @@ export default function ApartmentListPage() {
                 key={apartment.id}
                 className="bg-white rounded-lg shadow-lg p-4 border border-gray-300 hover:shadow-2xl transition-transform transform hover:scale-105"
               >
+                <div className="w-full h-48 mb-4 overflow-hidden rounded-lg">
+                  <img
+                    src={
+                      apartment.photos?.length > 0
+                        ? `${imageBaseUrl}/${apartment.photos[0].path}`
+                        : '/placeholder.jpg'
+                    }
+                    alt={apartment.name}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
                 <h2 className="text-xl font-semibold text-indigo-600">{apartment.name}</h2>
                 <p className="text-md text-gray-500">{apartment.address}</p>
-                <p className="text-gray-700 mt-2">{`Bedrooms: ${apartment.number_of_bedroom}`}</p>
-                <p className="text-gray-700">{`Kitchen Inside: ${apartment.kitchen_inside ? 'Yes' : 'No'}`}</p>
-                <p className="text-gray-700">{`Kitchen Outside: ${apartment.kitchen_outside ? 'Yes' : 'No'}`}</p>
-                <p className="text-gray-700">{`Floors: ${apartment.number_of_floor}`}</p>
+                <p className="text-gray-700 mt-2">Bedrooms: {apartment.number_of_bedroom}</p>
+                <p className="text-gray-700">Kitchen Inside: {apartment.kitchen_inside ? 'Yes' : 'No'}</p>
+                <p className="text-gray-700">Kitchen Outside: {apartment.kitchen_outside ? 'Yes' : 'No'}</p>
+                <p className="text-gray-700">Floors: {apartment.number_of_floor}</p>
 
                 <div className="mt-2 text-sm text-gray-600 space-y-1">
                   <div>
