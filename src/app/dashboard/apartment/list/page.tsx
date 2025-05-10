@@ -89,6 +89,7 @@ export default function ApartmentListPage() {
                     alt={apartment.name}
                     className="object-cover w-full h-full"
                   />
+                  
                 </div>
                 <h2 className="text-xl font-semibold text-indigo-600">{apartment.name}</h2>
                 <p className="text-md text-gray-500">{apartment.address}</p>
