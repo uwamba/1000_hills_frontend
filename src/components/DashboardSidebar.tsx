@@ -15,6 +15,7 @@ import {
     List,
     CalendarCheck,
     CreditCard,
+    Bus,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -141,6 +142,17 @@ export default function DashboardSidebar() {
                     open={openBus}
                     toggle={() => setOpenBus(!openBus)}
                 >
+                    <SidebarSubItem
+                        href="/dashboard/bus/layout-add"
+                        label="Add Bus Layout"
+                        icon={<Bus size={16} />}
+                    />
+                    <SidebarSubItem
+                        href="/dashboard/bus/layout-list"
+                        label="Bus Layout List"
+                        icon={<List size={16} />}
+
+                    />
                     <SidebarSubItem
                         href="/dashboard/agency/add"
                         label="Add New Agency"
