@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 
 interface Photo {
   id: number;
@@ -29,6 +29,8 @@ export default function HotelListPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
 
   const fetchHotels = async (page: number) => {
     try {
@@ -51,12 +53,43 @@ export default function HotelListPage() {
     fetchHotels(page);
   }, [page]);
 
-  const handlePrev = () => {
-    if (page > 1) setPage(page - 1);
+  const handlePrev = () => page > 1 && setPage(page - 1);
+  const handleNext = () => page < lastPage && setPage(page + 1);
+
+  const handleEditSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedHotel) return;
+
+    const formData = new FormData(e.currentTarget);
+    const photoFile = formData.get('photo') as File;
+
+    formData.append('_method', 'PUT'); // If using Laravel
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels/${selectedHotel.id}`, {
+        method: 'POST', // If Laravel, POST with _method = PUT
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error('Failed to update hotel');
+      setIsEditModalOpen(false);
+      fetchHotels(page);
+    } catch (error) {
+      console.error('Error updating hotel:', error);
+    }
   };
 
-  const handleNext = () => {
-    if (page < lastPage) setPage(page + 1);
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this hotel?')) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to delete hotel');
+      fetchHotels(page);
+    } catch (error) {
+      console.error('Error deleting hotel:', error);
+    }
   };
 
   const imageBaseUrl = 'http://127.0.0.1:8000/storage';
@@ -107,11 +140,30 @@ export default function HotelListPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Edit/Delete buttons */}
+                <div className="mt-4 flex space-x-2">
+                  <button
+                    onClick={() => {
+                      setSelectedHotel(hotel);
+                      setIsEditModalOpen(true);
+                    }}
+                    className="px-3 py-1 bg-yellow-500 text-white rounded"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(hotel.id)}
+                    className="px-3 py-1 bg-red-600 text-white rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Pagination Controls */}
+          {/* Pagination */}
           <div className="mt-8 flex justify-center space-x-4">
             <button
               onClick={handlePrev}
@@ -132,6 +184,44 @@ export default function HotelListPage() {
             </button>
           </div>
         </>
+      )}
+
+      {/* Edit Modal */}
+      {isEditModalOpen && selectedHotel && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg">
+            <h2 className="text-2xl font-bold mb-4">Edit Hotel</h2>
+            <form onSubmit={handleEditSubmit} encType="multipart/form-data">
+              <input name="name" defaultValue={selectedHotel.name} className="w-full p-2 mb-2 border" />
+              <input name="address" defaultValue={selectedHotel.address} className="w-full p-2 mb-2 border" />
+              <textarea name="description" defaultValue={selectedHotel.description} className="w-full p-2 mb-2 border" />
+              <input name="stars" type="number" defaultValue={selectedHotel.stars} className="w-full p-2 mb-2 border" />
+              <select name="status" defaultValue={selectedHotel.status || ''} className="w-full p-2 mb-4 border">
+                <option value="">Select status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">New Photo (optional)</label>
+                <input type="file" name="photo" className="w-full p-2 border" />
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 bg-gray-400 text-white rounded"
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">
+                  Save
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

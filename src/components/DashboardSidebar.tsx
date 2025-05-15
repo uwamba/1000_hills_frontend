@@ -183,6 +183,16 @@ export default function DashboardSidebar() {
                         label="View payments"
                         icon={<CreditCard size={16} />}
                     />
+                    <SidebarSubItem
+                        href="/dashboard/Journey/Add"
+                        label="Add new Journey "
+                        icon={<CreditCard size={16} />}
+                    />
+                     <SidebarSubItem
+                        href="/dashboard/Journey/list"
+                        label="Journey list"
+                        icon={<CreditCard size={16} />}
+                    />
                 </SidebarGroup>
             </nav>
         </aside>
