@@ -1,43 +1,50 @@
 "use client";
 
 import React, { useState } from "react";
-
-const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+import { FaChair, FaTimes } from "react-icons/fa";
 
 interface BookingFormProps {
   propertyId: string;
   price: number;
-object_type: string;
+  object_type: string;
+  seatLayout: {
+    row: number;
+    seats_per_row: number;
+    exclude: number[];
+  };
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_type }) => {
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+const TicketBookingForm: React.FC<BookingFormProps> = ({
+  propertyId,
+  price,
+  object_type,
+  seatLayout,
+}) => {
   const [formData, setFormData] = useState({
-    from_date_time: "",       // ISO string from datetime-local
+    from_date_time: "",
     to_date_time: "",
     email: "",
     names: "",
     country: "",
     phone: "",
-    object_type: object_type,
+    object_type,
     object_id: propertyId,
     amount_to_pay: price.toString(),
+    seat_number: "",
     status: "",
   });
 
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"form" | "otp" | "success">("form");
+  const [step, setStep] = useState<"select-seat" | "form" | "otp" | "success">("select-seat");
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const openModal = () => {
     setShowModal(true);
-    setStep("form");
+    setStep("select-seat");
   };
 
   const closeModal = () => {
@@ -49,17 +56,27 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
       names: "",
       country: "",
       phone: "",
-      object_type: "Room",
+      object_type,
       object_id: propertyId,
       amount_to_pay: price.toString(),
+      seat_number: "",
       status: "",
     });
     setOtp("");
+    setStep("select-seat");
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSeatSelect = (seatNumber: number) => {
+    setFormData((prev) => ({ ...prev, seat_number: seatNumber.toString() }));
     setStep("form");
   };
 
   const sendOtp = async () => {
-    // Basic check to ensure dates are filled
     if (!formData.from_date_time || !formData.to_date_time) {
       return alert("Please select both From and To dates before continuing.");
     }
@@ -93,9 +110,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
       });
       if (!res.ok) throw new Error("Invalid OTP");
 
-      // Before booking, log payload
-      console.log("Booking payload:", formData);
-
       const bookingRes = await fetch(`${apiUrl}/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -113,128 +127,164 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
     }
   };
 
+  const renderSeatLayout = () => {
+    const { row, seats_per_row, exclude } = seatLayout;
+    const layout = [];
+    let seatId = 1;
+
+    for (let r = 0; r < row; r++) {
+      const rowSeats = [];
+      for (let s = 0; s < seats_per_row; s++) {
+        const isExcluded = exclude.includes(seatId);
+        const isSelected = formData.seat_number === seatId.toString();
+
+        rowSeats.push(
+          <button
+            key={seatId}
+            disabled={isExcluded}
+            onClick={() => handleSeatSelect(seatId)}
+            className={`m-1 p-2 rounded ${
+              isExcluded
+                ? "bg-gray-300 cursor-not-allowed"
+                : isSelected
+                ? "bg-green-500 text-white"
+                : "bg-blue-500 text-white"
+            }`}
+          >
+            <FaChair />
+            <span className="block text-xs">{seatId}</span>
+          </button>
+        );
+        seatId++;
+      }
+      layout.push(
+        <div key={`row-${r}`} className="flex justify-center mb-2">
+          {rowSeats}
+        </div>
+      );
+    }
+    return layout;
+  };
+
   return (
     <>
       <button
+        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
         onClick={openModal}
-        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
       >
         Book Now
       </button>
 
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
-            <p className="text-xs text-gray-400 mb-2">Step: {step}</p>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center"
+          onClick={(e) => {
+            if ((e.target as HTMLElement).classList.contains("bg-black")) closeModal();
+          }}
+        >
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 relative">
             <button
               onClick={closeModal}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              className="absolute top-3 right-3 text-gray-600 hover:text-black"
             >
-              &times;
+              <FaTimes size={18} />
             </button>
 
-            {step === "form" && (
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Booking Details</h2>
+            {step === "select-seat" && (
+              <>
+                <h2 className="text-lg font-bold mb-4">Select Your Seat</h2>
+                {renderSeatLayout()}
+              </>
+            )}
 
-                {/* DATE-TIME PICKERS */}
-                <label className="block">
-                  <span className="text-gray-700">From</span>
+            {step === "form" && (
+              <>
+                <h2 className="text-lg font-bold mb-4">Enter Booking Details</h2>
+                <div className="space-y-2">
                   <input
-                    type="datetime-local"
                     name="from_date_time"
+                    type="datetime-local"
                     value={formData.from_date_time}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded mt-1"
+                    className="w-full p-2 border rounded"
                   />
-                </label>
-                <label className="block">
-                  <span className="text-gray-700">To</span>
                   <input
-                    type="datetime-local"
                     name="to_date_time"
+                    type="datetime-local"
                     value={formData.to_date_time}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded mt-1"
+                    className="w-full p-2 border rounded"
                   />
-                </label>
+                  <input
+                    name="names"
+                    placeholder="Full Names"
+                    value={formData.names}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                  />
+                  <input
+                    name="email"
+                    type="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                  />
+                  <input
+                    name="country"
+                    placeholder="Country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                  />
+                  <input
+                    name="phone"
+                    placeholder="Phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                  />
 
-                {/* CLIENT INFO */}
-                <input
-                  type="text"
-                  name="names"
-                  placeholder="Full Name"
-                  value={formData.names}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
-                />
-                <input
-                  type="text"
-                  name="country"
-                  placeholder="Country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
-                />
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
-                />
-
-                {/* CONTINUE */}
-                <button
-                  type="button"
-                  onClick={sendOtp}
-                  disabled={isSending}
-                  className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  {isSending ? "Sending OTP..." : "Continue"}
-                </button>
-              </div>
+                  <button
+                    onClick={sendOtp}
+                    disabled={isSending}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded mt-2"
+                  >
+                    {isSending ? "Sending OTP..." : "Send OTP"}
+                  </button>
+                </div>
+              </>
             )}
 
             {step === "otp" && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Verify OTP</h2>
+              <>
+                <h2 className="text-lg font-bold mb-4">Enter OTP</h2>
                 <input
                   type="text"
                   placeholder="Enter OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded mb-3"
                 />
                 <button
-                  type="button"
                   onClick={verifyOtp}
                   disabled={isVerifying}
-                  className="w-full p-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
                 >
-                  {isVerifying ? "Verifying..." : "Verify & Book"}
+                  {isVerifying ? "Verifying..." : "Verify and Book"}
                 </button>
-              </div>
+              </>
             )}
 
             {step === "success" && (
-              <div className="text-center space-y-4">
-                <h2 className="text-xl font-bold text-green-700">Booking Confirmed!</h2>
-                <p>Thank you. We’ll be in touch soon.</p>
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-green-600 mb-4">Booking Successful!</h2>
+                <p>Check your email for confirmation.</p>
                 <button
                   onClick={closeModal}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                  className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
                 >
-                  Close
+                  Done
                 </button>
               </div>
             )}
@@ -245,4 +295,4 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
   );
 };
 
-export default BookingForm;
+export default TicketBookingForm;
