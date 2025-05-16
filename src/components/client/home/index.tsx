@@ -9,8 +9,10 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 export default function Home() {
   const suggestions = [
     { text: "Hotel Rooms", link: "/roomList" },
-    { text: "Apartment booking", link: "/apartment" },
-    { text: "Bus ticketing", link: "/bus" }
+    { text: "Apartment booking", link: "/apartmentsListing" },
+    { text: "Bus ticketing", link: "/busListing" }
+
+     
   ];
   const [query, setQuery] = useState("");
   const [filtered, setFiltered] = useState<{ text: string, link: string }[]>([]);

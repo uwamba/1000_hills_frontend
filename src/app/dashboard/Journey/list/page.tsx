@@ -2,6 +2,30 @@
 
 import { useEffect, useState } from 'react';
 
+interface Agency {
+  id: number;
+  name: string;
+  address: string;
+  description: string;
+}
+
+interface Layout {
+  id: number;
+  name: string;
+  row: number;
+  column: number;
+  seat_row: number;
+  seat_column: number;
+  exclude: string | null;
+}
+
+interface Bus {
+  id: number;
+  name: string;
+  agency: Agency;
+  layout: Layout;
+}
+
 interface Journey {
   id: number;
   route_id: number;
@@ -11,6 +35,10 @@ interface Journey {
   return: string;
   status: string | null;
   deleted_on: string | null;
+  bus_id: number;
+  bus: Bus | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface JourneyResponse {
@@ -85,6 +113,37 @@ export default function JourneyListPage() {
                   <span className="font-medium">Return:</span>{' '}
                   {new Date(journey.return).toLocaleString()}
                 </p>
+
+                {journey.bus && (
+                  <div className="mt-4 text-sm text-gray-700 space-y-1">
+                    <p>
+                      <span className="font-semibold">Bus:</span> {journey.bus.name}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Agency:</span> {journey.bus.agency.name}
+                    </p>
+                    <p className="text-sm text-gray-600 ml-2">
+                      <span className="font-medium">Address:</span> {journey.bus.agency.address}
+                      <br />
+                      <span className="font-medium">Description:</span>{' '}
+                      {journey.bus.agency.description}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Layout:</span> {journey.bus.layout.name}{' '}
+                      ({journey.bus.layout.row}x{journey.bus.layout.column})
+                    </p>
+                    <p className="text-sm text-gray-600 ml-2">
+                      <span className="font-medium">Seat Rows:</span>{' '}
+                      {journey.bus.layout.seat_row}, <span className="font-medium">Columns:</span>{' '}
+                      {journey.bus.layout.seat_column}
+                      <br />
+                      {journey.bus.layout.exclude && (
+                        <span className="font-medium text-red-500">Excluded: {journey.bus.layout.exclude}</span>
+                      )}
+                    </p>
+                  </div>
+                )}
+
                 <div className="mt-2 text-sm text-gray-600 space-y-1">
                   <div>
                     <span className="font-medium">Status:</span>{' '}

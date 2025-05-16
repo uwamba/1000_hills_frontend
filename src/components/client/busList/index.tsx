@@ -1,0 +1,272 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import BookingForm from '../bookingForm';
+
+interface Agency {
+    id: number;
+    name: string;
+    address: string;
+    description: string;
+}
+
+interface Layout {
+    id: number;
+    name: string;
+    row: number;
+    column: number;
+    seat_row: number;
+    seat_column: number;
+    exclude: string | null;
+}
+
+interface Bus {
+    id: number;
+    name: string;
+    agency: Agency;
+    layout: Layout;
+}
+
+interface Journey {
+    id: number;
+    route_id: number;
+    from: string;
+    to: string;
+    departure: string;
+    return: string;
+    status: string | null;
+    deleted_on: string | null;
+    bus_id: number;
+    bus: Bus | null;
+    created_at: string;
+    updated_at: string;
+    price?: number;
+}
+
+interface JourneyResponse {
+    current_page: number;
+    last_page: number;
+    data: Journey[];
+}
+
+export default function BustList() {
+    const [journeys, setJourneys] = useState<Journey[]>([]);
+    const [filteredJourneys, setFilteredJourneys] = useState<Journey[]>([]);
+    const [agencies, setAgencies] = useState<string[]>([]);
+
+    const [search, setSearch] = useState('');
+    const [selectedAgency, setSelectedAgency] = useState('');
+    const [departureDate, setDepartureDate] = useState('');
+
+    const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [lastPage, setLastPage] = useState(1);
+    const [limit] = useState(20);
+
+    const fetchJourneys = async (page: number) => {
+        try {
+            setLoading(true);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys?page=${page}&limit=${limit}`);
+            if (!res.ok) throw new Error('Failed to fetch journeys');
+            const json: JourneyResponse = await res.json();
+
+            const journeysWithPrice = json.data.map((j) => ({
+                ...j,
+                price: j.price || Math.floor(Math.random() * 10000) + 2000,
+            }));
+
+            const agencyNames = Array.from(
+                new Set(journeysWithPrice.map((j) => j.bus?.agency.name).filter(Boolean))
+            );
+
+            setJourneys(journeysWithPrice);
+            setFilteredJourneys(journeysWithPrice);
+            setAgencies(agencyNames as string[]);
+            setPage(json.current_page);
+            setLastPage(json.last_page);
+        } catch (error) {
+            console.error('Error fetching journeys:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    const handleBook = (journeyId: number) => {
+        // You can navigate to the booking page or open a modal
+
+    };
+
+
+    useEffect(() => {
+        fetchJourneys(page);
+    }, [page]);
+
+    useEffect(() => {
+        let filtered = [...journeys];
+
+        if (search.trim()) {
+            const keyword = search.toLowerCase();
+            filtered = filtered.filter((j) =>
+                j.from.toLowerCase().includes(keyword) ||
+                j.to.toLowerCase().includes(keyword) ||
+                j.bus?.agency.name.toLowerCase().includes(keyword)
+            );
+        }
+
+        if (selectedAgency) {
+            filtered = filtered.filter((j) => j.bus?.agency.name === selectedAgency);
+        }
+
+        if (departureDate) {
+            filtered = filtered.filter((j) =>
+                j.departure.slice(0, 10) === departureDate
+            );
+        }
+
+        setFilteredJourneys(filtered);
+    }, [search, selectedAgency, departureDate, journeys]);
+
+    return (
+        <div className="p-6 bg-gray-100 min-h-screen">
+            <h1 className="text-2xl font-bold mb-6 text-indigo-800">Available Journeys</h1>
+
+            {/* Filter Container */}
+            <div className="bg-blue-700 rounded-lg p-6 mb-8 shadow-sm">
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                        <div className="flex flex-col w-full md:w-1/3">
+                            <label htmlFor="search" className="text-sm font-semibold text-gray-700 mb-1">Search</label>
+                            <input
+                                id="search"
+                                type="text"
+                                placeholder="Search by route or agency..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                            />
+                        </div>
+
+                        <div className="flex flex-col w-full md:w-1/4">
+                            <label htmlFor="agency" className="text-sm font-semibold text-gray-700 mb-1">Agency</label>
+                            <select
+                                id="agency"
+                                value={selectedAgency}
+                                onChange={(e) => setSelectedAgency(e.target.value)}
+                                className="p-2 border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                            >
+                                <option value="">All Agencies</option>
+                                {agencies.map((agency) => (
+                                    <option key={agency} value={agency}>
+                                        {agency}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex flex-col w-full md:w-1/4">
+                            <label htmlFor="departure" className="text-sm font-semibold text-gray-700 mb-1">Departure Date</label>
+                            <input
+                                id="departure"
+                                type="date"
+                                value={departureDate}
+                                onChange={(e) => setDepartureDate(e.target.value)}
+                                className="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+                            />
+                        </div>
+
+                        <div className="flex items-end w-full md:w-auto">
+                            <button
+                                onClick={() => {
+                                    setSearch('');
+                                    setSelectedAgency('');
+                                    setDepartureDate('');
+                                }}
+                                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition w-full md:w-auto"
+                            >
+                                Clear Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Journey Cards */}
+            {loading ? (
+                <div className="text-center text-lg text-gray-600">Loading...</div>
+            ) : filteredJourneys.length === 0 ? (
+                <div className="text-center text-lg text-gray-500">No journeys match your criteria.</div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredJourneys.map((journey) => (
+                        <div key={journey.id} className="bg-white rounded-xl shadow p-5 hover:shadow-md transition-all">
+                            <div className="flex justify-between items-start mb-3">
+                                <h2 className="text-xl font-semibold text-indigo-700">
+                                    {journey.from} ➡️ {journey.to}
+                                </h2>
+                                <span className="text-sm px-2 py-1 rounded bg-indigo-100 text-indigo-800 font-medium">
+                                    {journey.status || 'Inactive'}
+                                </span>
+                            </div>
+
+                            <div className="text-gray-600 text-sm mb-2">
+                                <strong className="text-gray-800">Agency:</strong> {journey.bus?.agency.name || '—'}
+                            </div>
+
+                            <div className="text-gray-600 text-sm mb-2">
+                                <strong className="text-gray-800">Bus:</strong> {journey.bus?.name || '—'} |{' '}
+                                <span className="text-gray-500 text-xs">{journey.bus?.layout.name}</span>
+                            </div>
+
+                            <div className="text-gray-600 text-sm mb-2">
+                                <strong className="text-gray-800">Departure:</strong>{' '}
+                                {new Date(journey.departure).toLocaleString()}
+                            </div>
+
+                            <div className="text-gray-600 text-sm mb-2">
+                                <strong className="text-gray-800">Return:</strong>{' '}
+                                {new Date(journey.return).toLocaleString()}
+                            </div>
+
+                            <div className="text-gray-700 text-lg mt-4 font-bold">
+                                {journey.price?.toLocaleString()} RWF
+                            </div>
+
+                            <div className="mt-4">
+                                {/* BookingForm integration */}
+                                <BookingForm
+                                    propertyId={journey.id.toString()}
+                                    price={journey.price ?? 0}
+                                    object_type="ticket"
+                                />
+
+
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+            )}
+
+            {/* Pagination */}
+            <div className="mt-10 flex justify-center items-center space-x-4">
+                <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
+                >
+                    Previous
+                </button>
+                <span className="text-gray-700">
+                    Page {page} of {lastPage}
+                </span>
+                <button
+                    onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
+                    disabled={page === lastPage}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
+                >
+                    Next
+                </button>
+            </div>
+        </div>
+    );
+}

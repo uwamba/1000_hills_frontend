@@ -9,8 +9,9 @@ export default function Header() {
         <h1 className="text-2xl font-bold">Visit 1000 Hills</h1>
         <nav className="space-x-6">
           <Link href="/" className="hover:underline">Home</Link>
-          <Link href="/roomList" className="hover:underline">Hotels Room List</Link>
-          <Link href="/bus" className="hover:underline">Bus Tickets</Link>
+          <Link href="/roomList" className="hover:underline">Hotels Rooms</Link>
+          <Link href="/busListing" className="hover:underline">Bus Tickets</Link>
+          <Link href="/apartmentsListing" className="hover:underline">Apartment</Link>
           <Link href="/contact" className="hover:underline">Contact</Link>
         </nav>
       </div>
