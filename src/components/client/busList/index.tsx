@@ -71,7 +71,6 @@ export default function BusList() {
 
       const journeysWithPrice = json.data.map((j) => ({
         ...j,
-        price: j.price || Math.floor(Math.random() * 10000) + 2000,
       }));
 
       const agencyNames = Array.from(

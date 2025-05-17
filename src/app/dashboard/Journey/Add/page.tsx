@@ -15,6 +15,7 @@ export default function AddJourneyPage() {
     return: '',
     time: '',
     bus_id: '',
+    price: '', // <-- Added price
   });
 
   const [locations, setLocations] = useState<string[]>([]);
@@ -55,7 +56,8 @@ export default function AddJourneyPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-       console.log(response);
+
+      console.log(response);
       if (!response.ok) throw new Error('Failed to create journey');
       const data = await response.json();
       alert('Journey created successfully!');
@@ -160,6 +162,20 @@ export default function AddJourneyPage() {
             name="return"
             value={formData.return}
             onChange={handleChange}
+            className="border rounded px-3 py-2"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="mb-1 font-medium">Price (RWF)</label>
+          <input
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            required
+            min="0"
+            step="0.01"
             className="border rounded px-3 py-2"
           />
         </div>
