@@ -2,45 +2,46 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import BookingForm from '../bookingForm';
 
 interface User {
-    id: number;
-    name: string;
+  id: number;
+  name: string;
 }
 
 interface Hotel {
-    id: number;
-    name: string;
+  id: number;
+  name: string;
 }
 
 interface Photo {
-    id: number;
-    path: string;
+  id: number;
+  path: string;
 }
 
 interface Room {
-    id: number;
-    name: string;
-    type: string;
-    has_wireless: boolean;
-    bed_size: string;
-    has_bathroom: boolean;
-    price: number;
-    currency: string;
-    number_of_people: number;
-    has_ac: boolean;
-    hotel: Hotel | null;
-    status: string | null;
-    deleted_on: string | null;
-    updatedBy?: User | null;
-    deletedBy?: User | null;
-    photos?: Photo[];
+  id: number;
+  name: string;
+  type: string;
+  has_wireless: boolean;
+  bed_size: string;
+  has_bathroom: boolean;
+  price: number;
+  currency: string;
+  number_of_people: number;
+  has_ac: boolean;
+  hotel: Hotel | null;
+  status: string | null;
+  deleted_on: string | null;
+  updatedBy?: User | null;
+  deletedBy?: User | null;
+  photos?: Photo[];
 }
 
 export default function RoomDetailComponent() {
   const { id } = useParams();
   const [room, setRoom] = useState<Room | null>(null);
-  const [similarRooms, setSimilarRooms] = useState<Room[]>([]); // Added state for similar rooms
+  const [similarRooms, setSimilarRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const imageBaseUrl = 'http://127.0.0.1:8000/storage';
@@ -53,7 +54,7 @@ export default function RoomDetailComponent() {
           if (!res.ok) throw new Error('Failed to fetch room details');
           const data = await res.json();
           setRoom(data.room);
-          setSimilarRooms(data.similarRooms); // Set similar rooms from the response
+          setSimilarRooms(data.similarRooms || []);
         } catch (error) {
           console.error('Error loading room:', error);
         } finally {
@@ -80,9 +81,8 @@ export default function RoomDetailComponent() {
       <h1 className="text-3xl font-bold text-indigo-700 mb-4">{room.name}</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
-        {/* Enhanced Image Gallery */}
+        {/* Image Gallery */}
         <div>
-          {/* Main Image */}
           <div className="w-full h-[400px] mb-4 rounded-xl overflow-hidden shadow-lg border border-gray-300">
             <img
               src={
@@ -95,7 +95,6 @@ export default function RoomDetailComponent() {
             />
           </div>
 
-          {/* Thumbnails */}
           {photos.length > 1 && (
             <div className="flex gap-3 overflow-x-auto">
               {photos.map((photo, index) => (
@@ -115,7 +114,7 @@ export default function RoomDetailComponent() {
           )}
         </div>
 
-        {/* Room Details */}
+        {/* Room Info + Booking */}
         <div>
           <p className="text-lg text-gray-700 mb-3">{room.name}</p>
 
@@ -140,13 +139,18 @@ export default function RoomDetailComponent() {
             )}
           </div>
 
-          <button className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
-            Book Now
-          </button>
+          {/* Booking Form Modal Button */}
+          <div className="mt-6">
+            <BookingForm
+              propertyId={room.id.toString()}
+              price={room.price ?? 0}
+              object_type="room"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Similar Rooms Section */}
+      {/* Similar Rooms */}
       <div className="mt-12">
         <h2 className="text-2xl font-semibold text-indigo-700 mb-4">Similar Rooms</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">

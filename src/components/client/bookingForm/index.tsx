@@ -7,7 +7,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 interface BookingFormProps {
   propertyId: string;
   price: number;
-object_type: string;
+  object_type: string;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_type }) => {
@@ -30,10 +30,14 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
   const [isVerifying, setIsVerifying] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement> | { name: string; value: string }
+  ) => {
+    const { name, value } = "target" in e ? e.target : e;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
 
   const openModal = () => {
     setShowModal(true);
@@ -49,7 +53,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
       names: "",
       country: "",
       phone: "",
-      object_type: "App\\Models\\Room",
+      object_type: "room",
       object_id: propertyId,
       amount_to_pay: price.toString(),
       status: "",
@@ -125,37 +129,49 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
-            <p className="text-xs text-gray-400 mb-2">Step: {step}</p>
+            <p className="text-xs text-gray-800 mb-2">Step: {step}</p>
             <button
               onClick={closeModal}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+              className="absolute top-2 right-2 text-gray-600 hover:text-black text-xl"
             >
               &times;
             </button>
 
             {step === "form" && (
               <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Booking Details</h2>
+                <h2 className="text-2xl font-bold text-black">Booking Details</h2>
 
-                {/* DATE-TIME PICKERS */}
+                {/* DATE PICKERS */}
                 <label className="block">
-                  <span className="text-gray-700">From</span>
+                  <span className="text-black">From</span>
                   <input
-                    type="datetime-local"
+                    type="date"
                     name="from_date_time"
-                    value={formData.from_date_time}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded mt-1"
+                    value={formData.from_date_time.split('T')[0]}
+                    onChange={(e) =>
+                      handleInputChange({
+                        name: "from_date_time",
+                        value: `${e.target.value}T00:00`,
+                      })
+                    }
+
+                    className="w-full p-2 border rounded mt-1 text-black"
                   />
                 </label>
                 <label className="block">
-                  <span className="text-gray-700">To</span>
+                  <span className="text-black">To</span>
                   <input
-                    type="datetime-local"
+                    type="date"
                     name="to_date_time"
-                    value={formData.to_date_time}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded mt-1"
+                    value={formData.to_date_time.split('T')[0]}
+                    onChange={(e) =>
+                      handleInputChange({
+                        name: "to_date_time",
+                        value: `${e.target.value}T00:00`,
+                      })
+                    }
+
+                    className="w-full p-2 border rounded mt-1 text-black"
                   />
                 </label>
 
@@ -166,7 +182,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
                   placeholder="Full Name"
                   value={formData.names}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded text-black"
                 />
                 <input
                   type="text"
@@ -174,7 +190,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
                   placeholder="Country"
                   value={formData.country}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded text-black"
                 />
                 <input
                   type="email"
@@ -182,7 +198,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
                   placeholder="Email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded text-black"
                 />
                 <input
                   type="tel"
@@ -190,7 +206,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
                   placeholder="Phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded text-black"
                 />
 
                 {/* CONTINUE */}
@@ -207,13 +223,13 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
 
             {step === "otp" && (
               <div className="space-y-4">
-                <h2 className="text-xl font-semibold">Verify OTP</h2>
+                <h2 className="text-xl font-semibold text-black">Verify OTP</h2>
                 <input
                   type="text"
                   placeholder="Enter OTP"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded text-black"
                 />
                 <button
                   type="button"
@@ -229,7 +245,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
             {step === "success" && (
               <div className="text-center space-y-4">
                 <h2 className="text-xl font-bold text-green-700">Booking Confirmed!</h2>
-                <p>Thank you. We’ll be in touch soon.</p>
+                <p className="text-black">Thank you. We’ll be in touch soon.</p>
                 <button
                   onClick={closeModal}
                   className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
@@ -241,6 +257,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
           </div>
         </div>
       )}
+
+
     </>
   );
 };
