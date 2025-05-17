@@ -82,6 +82,37 @@ export default function JourneyListPage() {
     if (page < lastPage) setPage(page + 1);
   };
 
+  const toggleApproval = async (id: number, currentStatus: string | null) => {
+    try {
+      const newStatus = currentStatus === 'approved' ? 'pending' : 'approved';
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update status');
+      fetchJourneys(page);
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this journey?')) return;
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) throw new Error('Failed to delete journey');
+      fetchJourneys(page);
+    } catch (error) {
+      console.error('Error deleting journey:', error);
+    }
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6">Journey List</h1>
@@ -147,7 +178,7 @@ export default function JourneyListPage() {
                 <div className="mt-2 text-sm text-gray-600 space-y-1">
                   <div>
                     <span className="font-medium">Status:</span>{' '}
-                    <span className={journey.status === 'active' ? 'text-green-600' : 'text-red-600'}>
+                    <span className={journey.status === 'approved' ? 'text-green-600' : 'text-yellow-600'}>
                       {journey.status || 'N/A'}
                     </span>
                   </div>
@@ -157,6 +188,25 @@ export default function JourneyListPage() {
                       {new Date(journey.deleted_on).toLocaleDateString()}
                     </div>
                   )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => toggleApproval(journey.id, journey.status)}
+                    className={`px-3 py-1 text-white rounded ${
+                      journey.status === 'approved' ? 'bg-yellow-500' : 'bg-green-600'
+                    }`}
+                  >
+                    {journey.status === 'approved' ? 'Mark Pending' : 'Approve'}
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(journey.id)}
+                    className="px-3 py-1 bg-red-600 text-white rounded"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
