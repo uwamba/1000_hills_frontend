@@ -7,50 +7,53 @@ interface Photo {
   path: string;
 }
 
-interface Apartment {
+interface Retreat {
   id: number;
-  name: string;
-  location: string;
+  title: string;
   description: string;
-  rooms: number;
+  address: string;
+  capacity: number;
   status: string | null;
+  viewed: number;
   deleted_on: string | null;
   photos: Photo[];
 }
 
-interface ApartmentResponse {
+interface RetreatResponse {
   current_page: number;
   last_page: number;
-  data: Apartment[];
+  data: Retreat[];
 }
 
-export default function ApartmentListPage() {
-  const [apartments, setApartments] = useState<Apartment[]>([]);
+export default function RetreatListPage() {
+  const [retreats, setRetreats] = useState<Retreat[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
+  const [selectedRetreat, setSelectedRetreat] = useState<Retreat | null>(null);
   const [photoInputs, setPhotoInputs] = useState<File[]>([]);
 
-  const fetchApartments = async (page: number) => {
+  const imageBaseUrl = 'http://127.0.0.1:8000/storage';
+
+  const fetchRetreats = async (page: number) => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments?page=${page}`);
-      if (!res.ok) throw new Error('Failed to fetch apartments');
-      const json: ApartmentResponse = await res.json();
-      setApartments(json.data);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/retreats?page=${page}`);
+      if (!res.ok) throw new Error('Failed to fetch retreats');
+      const json: RetreatResponse = await res.json();
+      setRetreats(json.data);
       setPage(json.current_page);
       setLastPage(json.last_page);
     } catch (error) {
-      console.error('Error fetching apartments:', error);
+      console.error('Error fetching retreats:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchApartments(page);
+    fetchRetreats(page);
   }, [page]);
 
   const handlePrev = () => page > 1 && setPage(page - 1);
@@ -58,7 +61,7 @@ export default function ApartmentListPage() {
 
   const handleEditSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!selectedApartment) return;
+    if (!selectedRetreat) return;
 
     const formData = new FormData(e.currentTarget);
     formData.append('_method', 'PUT');
@@ -68,46 +71,45 @@ export default function ApartmentListPage() {
     });
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments/${selectedApartment.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/retreats/${selectedRetreat.id}`, {
         method: 'POST',
         body: formData,
       });
 
-      if (!res.ok) throw new Error('Failed to update apartment');
+      if (!res.ok) throw new Error('Failed to update retreat');
       setIsEditModalOpen(false);
       setPhotoInputs([]);
-      fetchApartments(page);
+      fetchRetreats(page);
     } catch (error) {
-      console.error('Error updating apartment:', error);
+      console.error('Error updating retreat:', error);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this apartment?')) return;
+    if (!confirm('Are you sure you want to delete this retreat?')) return;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/retreats/${id}`, {
         method: 'DELETE',
       });
-      if (!res.ok) throw new Error('Failed to delete apartment');
-      fetchApartments(page);
+      if (!res.ok) throw new Error('Failed to delete retreat');
+      fetchRetreats(page);
     } catch (error) {
-      console.error('Error deleting apartment:', error);
+      console.error('Error deleting retreat:', error);
     }
   };
 
   const handlePhotoDelete = async (photoId: number) => {
     if (!confirm('Are you sure you want to delete this photo?')) return;
-
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/photos/${photoId}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('Failed to delete photo');
 
-      if (selectedApartment) {
-        setSelectedApartment({
-          ...selectedApartment,
-          photos: selectedApartment.photos.filter((photo) => photo.id !== photoId),
+      if (selectedRetreat) {
+        setSelectedRetreat({
+          ...selectedRetreat,
+          photos: selectedRetreat.photos.filter((photo) => photo.id !== photoId),
         });
       }
     } catch (error) {
@@ -118,7 +120,6 @@ export default function ApartmentListPage() {
   const handlePhotoChange = (index: number, e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-
     const updated = [...photoInputs];
     updated[index] = files[0];
     setPhotoInputs(updated);
@@ -128,37 +129,36 @@ export default function ApartmentListPage() {
     setPhotoInputs([...photoInputs, new File([], '')]);
   };
 
-  const imageBaseUrl = 'http://127.0.0.1:8000/storage';
-
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black">
-      <h1 className="text-3xl font-extrabold text-black mb-6">Apartment List</h1>
+      <h1 className="text-3xl font-extrabold text-black mb-6">Retreat List</h1>
 
       {loading ? (
-        <div>Loading apartments...</div>
-      ) : apartments.length === 0 ? (
-        <div>No apartments found.</div>
+        <div>Loading retreats...</div>
+      ) : retreats.length === 0 ? (
+        <div>No retreats found.</div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {apartments.map((apartment) => (
-              <div key={apartment.id} className="bg-white p-4 rounded shadow">
+            {retreats.map((retreat) => (
+              <div key={retreat.id} className="bg-white p-4 rounded shadow">
                 <img
-                  src={apartment.photos[0] ? `${imageBaseUrl}/${apartment.photos[0].path}` : '/placeholder.jpg'}
+                  src={retreat.photos[0] ? `${imageBaseUrl}/${retreat.photos[0].path}` : '/placeholder.jpg'}
                   className="w-full h-48 object-cover rounded"
                 />
-                <h2 className="text-xl font-bold mt-2">{apartment.name}</h2>
-                <p>{apartment.location}</p>
-                <p>{apartment.description}</p>
-                <p>Rooms: {apartment.rooms}</p>
-                <p>Status: {apartment.status ?? 'N/A'}</p>
-                {apartment.deleted_on && <p className="text-red-600">Deleted On: {new Date(apartment.deleted_on).toLocaleDateString()}</p>}
+                <h2 className="text-xl font-bold mt-2">{retreat.title}</h2>
+                <p>{retreat.address}</p>
+                <p>{retreat.description}</p>
+                <p>Capacity: {retreat.capacity}</p>
+                <p>Status: {retreat.status ?? 'N/A'}</p>
+                <p>Viewed: {retreat.viewed}</p>
+                {retreat.deleted_on && <p className="text-red-600">Deleted On: {new Date(retreat.deleted_on).toLocaleDateString()}</p>}
 
                 <div className="mt-2 flex space-x-2">
                   <button
                     className="bg-yellow-500 text-white px-3 py-1 rounded"
                     onClick={() => {
-                      setSelectedApartment(apartment);
+                      setSelectedRetreat(retreat);
                       setPhotoInputs([]);
                       setIsEditModalOpen(true);
                     }}
@@ -167,7 +167,7 @@ export default function ApartmentListPage() {
                   </button>
                   <button
                     className="bg-red-600 text-white px-3 py-1 rounded"
-                    onClick={() => handleDelete(apartment.id)}
+                    onClick={() => handleDelete(retreat.id)}
                   >
                     Delete
                   </button>
@@ -188,16 +188,16 @@ export default function ApartmentListPage() {
         </>
       )}
 
-      {isEditModalOpen && selectedApartment && (
+      {isEditModalOpen && selectedRetreat && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-lg overflow-y-auto max-h-screen text-black">
-            <h2 className="text-2xl font-bold mb-4">Edit Apartment</h2>
+            <h2 className="text-2xl font-bold mb-4">Edit Retreat</h2>
             <form onSubmit={handleEditSubmit} encType="multipart/form-data">
-              <input name="name" defaultValue={selectedApartment.name} className="w-full p-2 mb-2 border" />
-              <input name="location" defaultValue={selectedApartment.location} className="w-full p-2 mb-2 border" />
-              <textarea name="description" defaultValue={selectedApartment.description} className="w-full p-2 mb-2 border" />
-              <input name="rooms" type="number" defaultValue={selectedApartment.rooms} className="w-full p-2 mb-2 border" />
-              <select name="status" defaultValue={selectedApartment.status ?? ''} className="w-full p-2 mb-4 border">
+              <input name="title" defaultValue={selectedRetreat.title} className="w-full p-2 mb-2 border" />
+              <input name="address" defaultValue={selectedRetreat.address} className="w-full p-2 mb-2 border" />
+              <textarea name="description" defaultValue={selectedRetreat.description} className="w-full p-2 mb-2 border" />
+              <input name="capacity" type="number" defaultValue={selectedRetreat.capacity} className="w-full p-2 mb-2 border" />
+              <select name="status" defaultValue={selectedRetreat.status ?? ''} className="w-full p-2 mb-4 border">
                 <option value="">Select status</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
@@ -207,7 +207,7 @@ export default function ApartmentListPage() {
               <div className="mb-4">
                 <label className="block font-medium mb-1">Current Photo(s)</label>
                 <div className="flex gap-2 flex-wrap">
-                  {selectedApartment.photos.map((photo) => (
+                  {selectedRetreat.photos.map((photo) => (
                     <div key={photo.id} className="relative group">
                       <img src={`${imageBaseUrl}/${photo.path}`} className="w-24 h-24 object-cover rounded border" />
                       <button

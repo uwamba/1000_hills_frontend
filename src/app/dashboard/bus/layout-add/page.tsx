@@ -48,9 +48,7 @@ export default function BusForm() {
     fetchAgencies();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     if (name.startsWith("seat_layout")) {
@@ -140,16 +138,13 @@ export default function BusForm() {
         rowSeats.push(
           <div
             key={currentSeatId}
-            className={`w-8 h-8 border border-gray-300 rounded text-center flex items-center justify-center cursor-pointer ${
-              isExcluded ? "bg-red-200" : "bg-green-200"
+            className={`w-8 h-8 rounded text-xs flex items-center justify-center cursor-pointer font-bold ${
+              isExcluded ? "bg-red-700 text-white" : "bg-green-700 text-white"
             }`}
             onClick={() => toggleSeatExclusion(currentSeatId)}
+            title={`Seat ${currentSeatId}`}
           >
-            {isExcluded ? (
-              <FaTimes className="text-red-500" />
-            ) : (
-              <FaChair className="text-green-500" />
-            )}
+            {isExcluded ? <FaTimes /> : <FaChair />}
           </div>
         );
         seatId++;
@@ -167,20 +162,20 @@ export default function BusForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md space-y-6"
+      className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md space-y-6 border border-gray-300"
     >
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Bus Layout</h2>
+      <h2 className="text-2xl font-bold text-black mb-4">Add New Bus Layout</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Bus Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Bus Name</label>
+          <label className="block text-sm font-semibold text-black">Bus Name</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-300 rounded"
+            className="w-full p-2 mt-1 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
             placeholder="Enter bus name"
             required
           />
@@ -188,12 +183,12 @@ export default function BusForm() {
 
         {/* Agency */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Agency</label>
+          <label className="block text-sm font-semibold text-black">Agency</label>
           <select
             name="agency_id"
             value={formData.agency_id}
             onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-300 rounded"
+            className="w-full p-2 mt-1 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
             required
           >
             <option value="">Select Agency</option>
@@ -207,53 +202,53 @@ export default function BusForm() {
 
         {/* Status */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Status</label>
+          <label className="block text-sm font-semibold text-black">Status</label>
           <input
             type="text"
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-300 rounded"
-            placeholder="e.g. active/inactive"
+            className="w-full p-2 mt-1 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
+            placeholder="e.g. active / inactive"
             required
           />
         </div>
 
         {/* Number of Seats */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Number of Seats</label>
+          <label className="block text-sm font-semibold text-black">Number of Seats</label>
           <input
             type="number"
             name="number_of_seat"
             value={formData.number_of_seat}
             onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-300 rounded"
+            className="w-full p-2 mt-1 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
             required
           />
         </div>
 
         {/* Seat Layout: Rows */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Rows</label>
+          <label className="block text-sm font-semibold text-black">Rows</label>
           <input
             type="number"
             name="seat_layout.row"
             value={formData.seat_layout.row}
             onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-300 rounded"
+            className="w-full p-2 mt-1 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
             required
           />
         </div>
 
         {/* Seat Layout: Seats per Row */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Seats per Row</label>
+          <label className="block text-sm font-semibold text-black">Seats per Row</label>
           <input
             type="number"
             name="seat_layout.seats_per_row"
             value={formData.seat_layout.seats_per_row}
             onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-300 rounded"
+            className="w-full p-2 mt-1 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-600 text-black"
             required
           />
         </div>
@@ -261,7 +256,7 @@ export default function BusForm() {
 
       {/* Seat Layout Preview */}
       <div className="mt-6">
-        <h3 className="text-lg font-semibold">Seat Layout Preview</h3>
+        <h3 className="text-lg font-bold text-black">Seat Layout Preview</h3>
         <div className="mt-2 space-y-2">{renderSeatLayout()}</div>
       </div>
 
@@ -270,8 +265,10 @@ export default function BusForm() {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 px-4 rounded-md text-white ${
-            loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          className={`w-full py-3 px-4 rounded-md text-white text-base font-bold transition ${
+            loading
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-blue-800 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
           }`}
         >
           {loading ? "Submitting..." : "Submit"}

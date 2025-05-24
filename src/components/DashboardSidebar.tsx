@@ -24,8 +24,9 @@ export default function DashboardSidebar() {
     const [openHotel, setOpenHotel] = useState(false);
     const [openRoom, setOpenRoom] = useState(false);
     const [openBus, setOpenBus] = useState(false);
-    const [openApartments, setOpenApartments] = useState(false);  // State for Apartments Management
+    const [openApartments, setOpenApartments] = useState(false);
     const [openSettings, setOpenSettings] = useState(false);
+    const [openRetreat, setOpenRetreat] = useState(false); // Retreat state
 
     return (
         <aside className="w-64 h-screen overflow-y-auto bg-gray-900 text-white p-4 space-y-6">
@@ -65,45 +66,21 @@ export default function DashboardSidebar() {
                     open={openHotel}
                     toggle={() => setOpenHotel(!openHotel)}
                 >
-                    <SidebarSubItem
-                        href="/dashboard/hotel/add"
-                        label="Add New Hotel"
-                        icon={<BedDouble size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/hotel/list"
-                        label="Hotel List"
-                        icon={<List size={16} />}
-                    />
+                    <SidebarSubItem href="/dashboard/hotel/add" label="Add New Hotel" icon={<BedDouble size={16} />} />
+                    <SidebarSubItem href="/dashboard/hotel/list" label="Hotel List" icon={<List size={16} />} />
                 </SidebarGroup>
 
                 {/* Apartments Management Group */}
                 <SidebarGroup
-                    label="Apartments Management"  // New Apartments Management Group
+                    label="Apartments Management"
                     icon={<BedDouble size={20} />}
                     open={openApartments}
                     toggle={() => setOpenApartments(!openApartments)}
                 >
-                    <SidebarSubItem
-                        href="/dashboard/apartment/add"
-                        label="Add New Apartment"
-                        icon={<BedDouble size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/apartment/list"
-                        label="Apartment List"
-                        icon={<List size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/apartment/booking"
-                        label="Apartment Booking"
-                        icon={<CalendarCheck size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/apartment/payment"
-                        label="Apartment Payment"
-                        icon={<CreditCard size={16} />}
-                    />
+                    <SidebarSubItem href="/dashboard/apartment/add" label="Add New Apartment" icon={<BedDouble size={16} />} />
+                    <SidebarSubItem href="/dashboard/apartment/list" label="Apartment List" icon={<List size={16} />} />
+                    <SidebarSubItem href="/dashboard/apartment/booking" label="Apartment Booking" icon={<CalendarCheck size={16} />} />
+                    <SidebarSubItem href="/dashboard/apartment/payment" label="Apartment Payment" icon={<CreditCard size={16} />} />
                 </SidebarGroup>
 
                 {/* Hotel Room Management Group */}
@@ -113,26 +90,10 @@ export default function DashboardSidebar() {
                     open={openRoom}
                     toggle={() => setOpenRoom(!openRoom)}
                 >
-                    <SidebarSubItem
-                        href="/dashboard/room/add"
-                        label="Add New Room"
-                        icon={<BedDouble size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/room/list"
-                        label="Hotel Room List"
-                        icon={<List size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/room/payment"
-                        label="Hotel Room Payment"
-                        icon={<List size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/room/booking"
-                        label="Hotel Room Booking"
-                        icon={<List size={16} />}
-                    />
+                    <SidebarSubItem href="/dashboard/room/add" label="Add New Room" icon={<BedDouble size={16} />} />
+                    <SidebarSubItem href="/dashboard/room/list" label="Hotel Room List" icon={<List size={16} />} />
+                    <SidebarSubItem href="/dashboard/room/payment" label="Hotel Room Payment" icon={<List size={16} />} />
+                    <SidebarSubItem href="/dashboard/room/booking" label="Hotel Room Booking" icon={<List size={16} />} />
                 </SidebarGroup>
 
                 {/* Bus Tickets Management Group */}
@@ -142,57 +103,29 @@ export default function DashboardSidebar() {
                     open={openBus}
                     toggle={() => setOpenBus(!openBus)}
                 >
-                    <SidebarSubItem
-                        href="/dashboard/bus/layout-add"
-                        label="Add Bus Layout"
-                        icon={<Bus size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/bus/layout-list"
-                        label="Bus Layout List"
-                        icon={<List size={16} />}
+                    <SidebarSubItem href="/dashboard/bus/layout-add" label="Add Bus Layout" icon={<Bus size={16} />} />
+                    <SidebarSubItem href="/dashboard/bus/layout-list" label="Bus Layout List" icon={<List size={16} />} />
+                    <SidebarSubItem href="/dashboard/agency/add" label="Add New Agency" icon={<BedDouble size={16} />} />
+                    <SidebarSubItem href="/dashboard/agency/list" label="Agency List" icon={<List size={16} />} />
+                    <SidebarSubItem href="/dashboard/bus/add" label="Add new bus" icon={<CalendarCheck size={16} />} />
+                    <SidebarSubItem href="/dashboard/bus/list" label="Bus list" icon={<CreditCard size={16} />} />
+                    <SidebarSubItem href="/dashboard/bus/booking" label="Bus Booking" icon={<CalendarCheck size={16} />} />
+                    <SidebarSubItem href="/dashboard/bus/payment" label="View payments" icon={<CreditCard size={16} />} />
+                    <SidebarSubItem href="/dashboard/Journey/Add" label="Add new Journey " icon={<CreditCard size={16} />} />
+                    <SidebarSubItem href="/dashboard/Journey/list" label="Journey list" icon={<CreditCard size={16} />} />
+                </SidebarGroup>
 
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/agency/add"
-                        label="Add New Agency"
-                        icon={<BedDouble size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/agency/list"
-                        label="Agency List"
-                        icon={<List size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/bus/add"
-                        label="Add new bus"
-                        icon={<CalendarCheck size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/bus/list"
-                        label="Bus list"
-                        icon={<CreditCard size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/bus/booking"
-                        label="Bus Booking"
-                        icon={<CalendarCheck size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/bus/payment"
-                        label="View payments"
-                        icon={<CreditCard size={16} />}
-                    />
-                    <SidebarSubItem
-                        href="/dashboard/Journey/Add"
-                        label="Add new Journey "
-                        icon={<CreditCard size={16} />}
-                    />
-                     <SidebarSubItem
-                        href="/dashboard/Journey/list"
-                        label="Journey list"
-                        icon={<CreditCard size={16} />}
-                    />
+                {/* Retreat Management Group */}
+                <SidebarGroup
+                    label="Retreat Management"
+                    icon={<Folder size={20} />}
+                    open={openRetreat}
+                    toggle={() => setOpenRetreat(!openRetreat)}
+                >
+                    <SidebarSubItem href="/dashboard/retreat/add" label="Add New Retreat" icon={<BedDouble size={16} />} />
+                    <SidebarSubItem href="/dashboard/retreat/list" label="Retreat List" icon={<List size={16} />} />
+                    <SidebarSubItem href="/dashboard/retreat/booking" label="Retreat Booking" icon={<CalendarCheck size={16} />} />
+                    <SidebarSubItem href="/dashboard/retreat/payment" label="Retreat Payment" icon={<CreditCard size={16} />} />
                 </SidebarGroup>
             </nav>
         </aside>

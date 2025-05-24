@@ -15,7 +15,7 @@ export default function AddJourneyPage() {
     return: '',
     time: '',
     bus_id: '',
-    price: '', // <-- Added price
+    price: '',
   });
 
   const [locations, setLocations] = useState<string[]>([]);
@@ -57,7 +57,6 @@ export default function AddJourneyPage() {
         body: JSON.stringify(formData),
       });
 
-      console.log(response);
       if (!response.ok) throw new Error('Failed to create journey');
       const data = await response.json();
       alert('Journey created successfully!');
@@ -69,124 +68,134 @@ export default function AddJourneyPage() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded mt-10"
-    >
-      <h2 className="text-2xl font-bold mb-6">Add New Journey</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium">From</label>
-          <select
-            name="from"
-            value={formData.from}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2"
-          >
-            <option value="">Select departure</option>
-            {locations.map((loc) => (
-              <option key={loc} value={loc}>
-                {loc}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium">To</label>
-          <select
-            name="to"
-            value={formData.to}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2"
-          >
-            <option value="">Select destination</option>
-            {locations.map((loc) => (
-              <option key={loc} value={loc}>
-                {loc}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium">Bus</label>
-          <select
-            name="bus_id"
-            value={formData.bus_id}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2"
-            disabled={loading}
-          >
-            <option value="">Select bus</option>
-            {buses.map((bus) => (
-              <option key={bus.id} value={bus.id}>
-                {bus.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium">Time</label>
-          <input
-            type="time"
-            name="time"
-            value={formData.time}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2"
-          />
-        </div>
-
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium">Departure</label>
-          <input
-            type="datetime-local"
-            name="departure"
-            value={formData.departure}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2"
-          />
-        </div>
-
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium">Return (optional)</label>
-          <input
-            type="datetime-local"
-            name="return"
-            value={formData.return}
-            onChange={handleChange}
-            className="border rounded px-3 py-2"
-          />
-        </div>
-
-        <div className="flex flex-col">
-          <label className="mb-1 font-medium">Price (RWF)</label>
-          <input
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            required
-            min="0"
-            step="0.01"
-            className="border rounded px-3 py-2"
-          />
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        className="mt-6 w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-3xl bg-white p-8 rounded-lg shadow-lg border border-gray-300"
       >
-        Add Journey
-      </button>
-    </form>
+        <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">
+          Add New Journey
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* From */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-gray-900">From</label>
+            <select
+              name="from"
+              value={formData.from}
+              onChange={handleChange}
+              required
+              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
+            >
+              <option value="">Select departure</option>
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* To */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-gray-900">To</label>
+            <select
+              name="to"
+              value={formData.to}
+              onChange={handleChange}
+              required
+              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
+            >
+              <option value="">Select destination</option>
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Bus */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-gray-900">Bus</label>
+            <select
+              name="bus_id"
+              value={formData.bus_id}
+              onChange={handleChange}
+              required
+              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
+              disabled={loading}
+            >
+              <option value="">Select bus</option>
+              {buses.map((bus) => (
+                <option key={bus.id} value={bus.id}>
+                  {bus.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Time */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-gray-900">Time</label>
+            <input
+              type="time"
+              name="time"
+              value={formData.time}
+              onChange={handleChange}
+              required
+              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
+            />
+          </div>
+
+          {/* Departure */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-gray-900">Departure</label>
+            <input
+              type="datetime-local"
+              name="departure"
+              value={formData.departure}
+              onChange={handleChange}
+              required
+              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
+            />
+          </div>
+
+          {/* Return */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-gray-900">Return (optional)</label>
+            <input
+              type="datetime-local"
+              name="return"
+              value={formData.return}
+              onChange={handleChange}
+              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
+            />
+          </div>
+
+          {/* Price */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-gray-900">Price (RWF)</label>
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              required
+              min="0"
+              step="0.01"
+              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          className="mt-8 w-full bg-green-700 text-white font-bold px-4 py-3 rounded hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          Add Journey
+        </button>
+      </form>
+    </div>
   );
 }

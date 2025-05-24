@@ -1,4 +1,3 @@
-
 "use client";
 import { useEffect, useState } from "react";
 import { FaChair, FaTimes } from "react-icons/fa";
@@ -53,7 +52,7 @@ export default function CreateBusPage() {
 
         const payload = new FormData();
         payload.append("name", formData.name);
-        payload.append("seat_type_id", formData.seat_type_id); // Send the correct seat_type_id
+        payload.append("seat_type_id", formData.seat_type_id);
         payload.append("number_of_seat", formData.number_of_seat);
         payload.append("agency_id", formData.agency_id);
         payload.append("status", formData.status);
@@ -102,7 +101,7 @@ export default function CreateBusPage() {
         setSelectedBusLayout(layout);
         setFormData({
             ...formData,
-            seat_type_id: layout.id.toString(), // Set seat_type_id when layout is selected
+            seat_type_id: layout.id.toString(),
         });
         setIsModalOpen(false);
     };
@@ -141,16 +140,16 @@ export default function CreateBusPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
+        <div className="max-w-4xl mx-auto p-6 text-black">
             <form
                 onSubmit={handleSubmit}
                 className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md space-y-6"
             >
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Bus</h2>
+                <h2 className="text-xl font-semibold text-black mb-4">Add New Bus</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Bus Name</label>
+                        <label className="block text-sm font-medium text-black">Bus Name</label>
                         <input
                             type="text"
                             name="name"
@@ -162,7 +161,7 @@ export default function CreateBusPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Number of Seats</label>
+                        <label className="block text-sm font-medium text-black">Number of Seats</label>
                         <input
                             type="number"
                             name="number_of_seat"
@@ -174,7 +173,7 @@ export default function CreateBusPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Seat Type</label>
+                        <label className="block text-sm font-medium text-black">Seat Type</label>
                         <button
                             type="button"
                             onClick={openSeatTypeModal}
@@ -185,7 +184,7 @@ export default function CreateBusPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Agency</label>
+                        <label className="block text-sm font-medium text-black">Agency</label>
                         <select
                             name="agency_id"
                             value={formData.agency_id}
@@ -203,7 +202,7 @@ export default function CreateBusPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Status</label>
+                        <label className="block text-sm font-medium text-black">Status</label>
                         <select
                             name="status"
                             value={formData.status}
@@ -231,7 +230,7 @@ export default function CreateBusPage() {
             {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                    <div className="bg-white max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 rounded relative">
+                    <div className="bg-white max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 rounded relative text-black">
                         <button
                             onClick={() => setIsModalOpen(false)}
                             className="absolute top-2 right-2 text-gray-600 hover:text-black"
@@ -239,7 +238,7 @@ export default function CreateBusPage() {
                             <FaTimes />
                         </button>
 
-                        <h3 className="text-lg font-semibold mb-4">Select Seat Layout</h3>
+                        <h3 className="text-lg font-semibold text-black mb-4">Select Seat Layout</h3>
 
                         {loadingLayouts ? (
                             <p>Loading seat layouts...</p>
@@ -249,10 +248,13 @@ export default function CreateBusPage() {
                                     <div
                                         key={layout.id}
                                         onClick={() => handleSeatTypeSelect(layout)}
-                                        className={`p-4 border rounded cursor-pointer shadow ${selectedBusLayout?.id === layout.id ? "ring-2 ring-blue-500" : ""
-                                            }`}
+                                        className={`p-4 border rounded cursor-pointer shadow ${
+                                            selectedBusLayout?.id === layout.id
+                                                ? "ring-2 ring-blue-500"
+                                                : ""
+                                        }`}
                                     >
-                                        <h4 className="font-medium">{layout.name}</h4>
+                                        <h4 className="font-medium text-black">{layout.name}</h4>
                                         {renderSeatLayout(
                                             layout.seat_layout.row,
                                             layout.seat_layout.seats_per_row,

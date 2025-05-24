@@ -15,6 +15,11 @@ interface FormDataType {
   annexes: string;
   description: string;
   status: string;
+  swimming_pool: boolean;
+  laundry: boolean;
+  gym: boolean;
+  room_service: boolean;
+  sauna_massage: boolean;
 }
 
 export default function ApartmentForm() {
@@ -29,6 +34,11 @@ export default function ApartmentForm() {
     annexes: '',
     description: '',
     status: '',
+    swimming_pool: false,
+    laundry: false,
+    gym: false,
+    room_service: false,
+    sauna_massage: false,
   });
 
   const [photos, setPhotos] = useState<File[]>([]);
@@ -38,7 +48,7 @@ export default function ApartmentForm() {
   ) => {
     const target = e.target;
     const { name, value, type } = target;
-  
+
     if (name === 'lat' || name === 'lng') {
       setFormData((prevData) => ({
         ...prevData,
@@ -64,7 +74,6 @@ export default function ApartmentForm() {
       }));
     }
   };
-  
 
   const handlePhotoChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -75,14 +84,13 @@ export default function ApartmentForm() {
   };
 
   const addPhotoField = () => {
-    setPhotos([...photos, new File([], "")]); // Placeholder to render an input
+    setPhotos([...photos, new File([], "")]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const formPayload = new FormData();
-
     formPayload.append("name", formData.name);
     formPayload.append("address", formData.address);
     formPayload.append("description", formData.description);
@@ -93,6 +101,11 @@ export default function ApartmentForm() {
     formPayload.append("status", formData.status);
     formPayload.append("coordinate", `${formData.coordinate.lat},${formData.coordinate.lng}`);
     formPayload.append("annexes", formData.annexes);
+    formPayload.append("swimming_pool", formData.swimming_pool ? '1' : '0');
+    formPayload.append("laundry", formData.laundry ? '1' : '0');
+    formPayload.append("gym", formData.gym ? '1' : '0');
+    formPayload.append("room_service", formData.room_service ? '1' : '0');
+    formPayload.append("sauna_massage", formData.sauna_massage ? '1' : '0');
 
     photos.forEach((photo) => {
       if (photo instanceof File) {
@@ -119,6 +132,11 @@ export default function ApartmentForm() {
           annexes: '',
           description: '',
           status: '',
+          swimming_pool: false,
+          laundry: false,
+          gym: false,
+          room_service: false,
+          sauna_massage: false,
         });
         setPhotos([]);
       } else {
@@ -134,135 +152,133 @@ export default function ApartmentForm() {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md space-y-6">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Apartment</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Add New Apartment</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Apartment Name</label>
+          <label className="block text-sm font-medium text-gray-900">Apartment Name</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-800 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Address</label>
+          <label className="block text-sm font-medium text-gray-900">Address</label>
           <input
             type="text"
             name="address"
             value={formData.address}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-800 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Latitude</label>
+          <label className="block text-sm font-medium text-gray-900">Latitude</label>
           <input
             type="text"
             name="lat"
             value={formData.coordinate.lat}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-800 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Longitude</label>
+          <label className="block text-sm font-medium text-gray-900">Longitude</label>
           <input
             type="text"
             name="lng"
             value={formData.coordinate.lng}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-800 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">Description</label>
+          <label className="block text-sm font-medium text-gray-900">Description</label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className="w-full p-2 mt-1 text-gray-800 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Number of Bedrooms</label>
+          <label className="block text-sm font-medium text-gray-900">Number of Bedrooms</label>
           <input
             type="number"
             name="number_of_bedroom"
             value={formData.number_of_bedroom}
             onChange={handleChange}
             min={1}
-            className="w-full p-2 mt-1 text-gray-800 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Number of Floors</label>
+          <label className="block text-sm font-medium text-gray-900">Number of Floors</label>
           <input
             type="number"
             name="number_of_floor"
             value={formData.number_of_floor}
             onChange={handleChange}
             min={1}
-            className="w-full p-2 mt-1 text-gray-800 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Kitchen Inside</label>
+        <div className="flex items-center gap-2">
           <input
             type="checkbox"
             name="kitchen_inside"
             checked={formData.kitchen_inside}
             onChange={handleChange}
-            className="w-full mt-1 text-gray-800 border border-gray-300 rounded"
           />
+          <label className="text-gray-900">Kitchen Inside</label>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Kitchen Outside</label>
+        <div className="flex items-center gap-2">
           <input
             type="checkbox"
             name="kitchen_outside"
             checked={formData.kitchen_outside}
             onChange={handleChange}
-            className="w-full mt-1 text-gray-800 border border-gray-300 rounded"
           />
+          <label className="text-gray-900">Kitchen Outside</label>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Annexes</label>
+          <label className="block text-sm font-medium text-gray-900">Annexes</label>
           <input
             type="text"
             name="annexes"
             value={formData.annexes}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-800 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Status</label>
+          <label className="block text-sm font-medium text-gray-900">Status</label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-800 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
           >
             <option value="">Select Status</option>
@@ -270,42 +286,56 @@ export default function ApartmentForm() {
             <option value="inactive">Inactive</option>
           </select>
         </div>
+
+        {/* Services Checkboxes */}
+        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+          {[
+            { label: 'Swimming Pool', name: 'swimming_pool' },
+            { label: 'Laundry', name: 'laundry' },
+            { label: 'Gym', name: 'gym' },
+            { label: 'Room Service', name: 'room_service' },
+            { label: 'Sauna Massage', name: 'sauna_massage' },
+          ].map((service) => (
+            <div key={service.name} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name={service.name}
+                checked={formData[service.name as keyof FormDataType] as boolean}
+                onChange={handleChange}
+              />
+              <label className="text-gray-900">{service.label}</label>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Photo Upload Section */}
-      <div className="mt-4">
-      <label className="block text-sm font-medium text-gray-800 mb-2">Photos</label>
-  
-      <div className="space-y-2">
-        {photos.map((_, index) => (
-          <input
-            key={index}
-            type="file"
-            accept="image/*"
-            name="photos"
-            multiple
-            onChange={(e) => handlePhotoChange(index, e)}
-            className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
-                       file:rounded file:border-0 file:text-sm file:font-semibold
-                       file:bg-blue-50 file:text-blue-700
-                       hover:file:bg-blue-100 border border-gray-300 rounded"
-          />
-        ))}
-      </div>
-
+      <div>
+        <label className="block text-sm font-medium text-gray-900 mb-2">Photos</label>
+        <div className="space-y-2">
+          {photos.map((_, index) => (
+            <input
+              key={index}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handlePhotoChange(index, e)}
+              className="block w-full text-sm text-gray-900 border border-gray-300 rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+          ))}
+        </div>
         <button
           type="button"
           onClick={addPhotoField}
-          className="mt-3 inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition"
+          className="mt-3 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
         >
           + Add Another Photo
         </button>
       </div>
 
-      <div className="mt-6">
+      <div>
         <button
           type="submit"
-          className="w-full py-3 text-white bg-blue-600 rounded hover:bg-blue-700 transition"
+          className="w-full py-3 text-white bg-blue-700 rounded hover:bg-blue-800 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           Submit Apartment
         </button>

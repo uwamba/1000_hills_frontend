@@ -30,6 +30,13 @@ interface Room {
   currency: string;
   number_of_people: number;
   has_ac: boolean;
+  has_swimming_pool?: boolean;
+  has_laundry?: boolean;
+  has_gym?: boolean;
+  has_room_service?: boolean;
+  has_sauna_massage?: boolean;
+  has_kitchen?: boolean;
+  has_fridge?: boolean;
   hotel: Hotel | null;
   status: string | null;
   deleted_on: string | null;
@@ -126,7 +133,15 @@ export default function RoomDetailComponent() {
             <p><strong>WiFi:</strong> {room.has_wireless ? 'Yes' : 'No'}</p>
             <p><strong>Bathroom:</strong> {room.has_bathroom ? 'Yes' : 'No'}</p>
             <p><strong>Air Conditioning:</strong> {room.has_ac ? 'Yes' : 'No'}</p>
-            <p><strong>Status:</strong> 
+            <p><strong>Swimming Pool:</strong> {room.has_swimming_pool ? 'Yes' : 'No'}</p>
+            <p><strong>Laundry:</strong> {room.has_laundry ? 'Yes' : 'No'}</p>
+            <p><strong>Gym:</strong> {room.has_gym ? 'Yes' : 'No'}</p>
+            <p><strong>Room Service:</strong> {room.has_room_service ? 'Yes' : 'No'}</p>
+            <p><strong>Sauna & Massage:</strong> {room.has_sauna_massage ? 'Yes' : 'No'}</p>
+            <p><strong>Kitchen:</strong> {room.has_kitchen ? 'Yes' : 'No'}</p>
+            <p><strong>Fridge:</strong> {room.has_fridge ? 'Yes' : 'No'}</p>
+            <p>
+              <strong>Status:</strong>{' '}
               <span className={room.status === 'available' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
                 {room.status || 'N/A'}
               </span>
@@ -139,7 +154,7 @@ export default function RoomDetailComponent() {
             )}
           </div>
 
-          {/* Booking Form Modal Button */}
+          {/* Booking Form */}
           <div className="mt-6">
             <BookingForm
               propertyId={room.id.toString()}

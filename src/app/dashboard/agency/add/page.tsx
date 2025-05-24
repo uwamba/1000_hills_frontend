@@ -60,54 +60,54 @@ export default function AgencyForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md space-y-6"
+      className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md space-y-6 text-black"
     >
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Agency</h2>
+      <h2 className="text-2xl font-bold mb-4">Add New Agency</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Agency Name</label>
+          <label className="block text-sm font-semibold">Agency Name</label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 border border-gray-400 rounded focus:ring-2 focus:ring-blue-600 focus:outline-none text-black bg-white"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Address</label>
+          <label className="block text-sm font-semibold">Address</label>
           <input
             type="text"
             name="address"
             value={formData.address}
             onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 border border-gray-400 rounded focus:ring-2 focus:ring-blue-600 focus:outline-none text-black bg-white"
             required
           />
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700">Description</label>
+          <label className="block text-sm font-semibold">Description</label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className="w-full p-2 mt-1 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 border border-gray-400 rounded focus:ring-2 focus:ring-blue-600 focus:outline-none text-black bg-white"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Status</label>
+          <label className="block text-sm font-semibold">Status</label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-300 rounded focus:ring focus:ring-blue-500"
+            className="w-full p-2 mt-1 border border-gray-400 rounded focus:ring-2 focus:ring-blue-600 focus:outline-none text-black bg-white"
             required
           >
             <option value="">Select Status</option>
@@ -120,7 +120,7 @@ export default function AgencyForm() {
       <div>
         <button
           type="submit"
-          className="w-full py-3 text-white bg-blue-600 rounded hover:bg-blue-700 transition"
+          className="w-full py-3 text-white bg-blue-700 rounded hover:bg-blue-800 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
         >
           Submit Agency
         </button>
