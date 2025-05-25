@@ -11,33 +11,36 @@ interface BookingFormProps {
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_type }) => {
-  const [formData, setFormData] = useState({
-    from_date_time: "",       // ISO string from datetime-local
+  const initialFormState = {
+    from_date_time: "",
     to_date_time: "",
     email: "",
     names: "",
     country: "",
     phone: "",
-    object_type: object_type,
+    object_type,
     object_id: propertyId,
     amount_to_pay: price.toString(),
     status: "",
-  });
+    payment_method: "",     // <-- New field
+    extra_note: "",  
+    momo_number:"",         // <-- New field
+  };
 
+
+  const [formData, setFormData] = useState(initialFormState);
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"form" | "otp" | "success">("form");
+  const [step, setStep] = useState<"form" | "payment" | "otp" | "success">("form");
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement> | { name: string; value: string }
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { name: string; value: string }
   ) => {
     const { name, value } = "target" in e ? e.target : e;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
 
   const openModal = () => {
     setShowModal(true);
@@ -46,45 +49,57 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
 
   const closeModal = () => {
     setShowModal(false);
-    setFormData({
-      from_date_time: "",
-      to_date_time: "",
-      email: "",
-      names: "",
-      country: "",
-      phone: "",
-      object_type: "room",
-      object_id: propertyId,
-      amount_to_pay: price.toString(),
-      status: "",
-    });
+    setFormData(initialFormState);
     setOtp("");
     setStep("form");
   };
 
-  const sendOtp = async () => {
-    // Basic check to ensure dates are filled
+  const goToPaymentStep = () => {
     if (!formData.from_date_time || !formData.to_date_time) {
-      return alert("Please select both From and To dates before continuing.");
+      return alert("Please select both From and To dates.");
     }
-
-    setIsSending(true);
-    try {
-      const res = await fetch(`${apiUrl}/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: formData.email }),
-      });
-      if (!res.ok) throw new Error("Failed to send OTP");
-      setStep("otp");
-    } catch (err) {
-      alert("Error sending OTP");
-      console.error(err);
-    } finally {
-      setIsSending(false);
+    if (!formData.email || !formData.names || !formData.phone || !formData.country) {
+      return alert("Please complete all personal details.");
     }
+    setStep("payment");
   };
+
+  const sendOtp = async () => {
+  const { momo_number, payment_method, email } = formData;
+
+  if (!payment_method) {
+    return alert("Please select a payment method.");
+  }
+
+
+  // Only validate MoMo phone if payment method is 'momo'
+  if (payment_method === "momo") {
+    const momoRegex = /^2507\d{8}$/;
+    if (!momoRegex.test(momo_number)) {
+      return alert("Please enter a valid MoMo phone number (format: 2507XXXXXXXX).");
+    }
+  }
+
+  setIsSending(true);
+  try {
+    const res = await fetch(`${apiUrl}/send-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email:formData.email }),
+    });
+
+    if (!res.ok) throw new Error("Failed to send OTP");
+
+    setStep("otp");
+  } catch (err) {
+    alert("Error sending OTP");
+    console.error(err);
+  } finally {
+    setIsSending(false);
+  }
+};
+
 
   const verifyOtp = async () => {
     setIsVerifying(true);
@@ -97,9 +112,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
       });
       if (!res.ok) throw new Error("Invalid OTP");
 
-      // Before booking, log payload
-      console.log("Booking payload:", formData);
-
       const bookingRes = await fetch(`${apiUrl}/bookings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -107,6 +119,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
         body: JSON.stringify(formData),
       });
       if (!bookingRes.ok) throw new Error("Booking failed");
+      console.log("Booking successful", formData);
 
       setStep("success");
     } catch (err) {
@@ -137,45 +150,43 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
               &times;
             </button>
 
+            {/* Step 1: User Info */}
             {step === "form" && (
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold text-black">Booking Details</h2>
 
-                {/* DATE PICKERS */}
                 <label className="block">
                   <span className="text-black">From</span>
                   <input
                     type="date"
                     name="from_date_time"
-                    value={formData.from_date_time.split('T')[0]}
+                    value={formData.from_date_time.split("T")[0]}
                     onChange={(e) =>
                       handleInputChange({
                         name: "from_date_time",
                         value: `${e.target.value}T00:00`,
                       })
                     }
-
                     className="w-full p-2 border rounded mt-1 text-black"
                   />
                 </label>
+
                 <label className="block">
                   <span className="text-black">To</span>
                   <input
                     type="date"
                     name="to_date_time"
-                    value={formData.to_date_time.split('T')[0]}
+                    value={formData.to_date_time.split("T")[0]}
                     onChange={(e) =>
                       handleInputChange({
                         name: "to_date_time",
                         value: `${e.target.value}T00:00`,
                       })
                     }
-
                     className="w-full p-2 border rounded mt-1 text-black"
                   />
                 </label>
 
-                {/* CLIENT INFO */}
                 <input
                   type="text"
                   name="names"
@@ -209,18 +220,80 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
                   className="w-full p-2 border rounded text-black"
                 />
 
-                {/* CONTINUE */}
                 <button
                   type="button"
-                  onClick={sendOtp}
-                  disabled={isSending}
+                  onClick={goToPaymentStep}
                   className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
-                  {isSending ? "Sending OTP..." : "Continue"}
+                  Continue to Payment
                 </button>
               </div>
             )}
 
+            {/* Step 2: Payment Method */}
+            {step === "payment" && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-black">Choose Payment Method</h2>
+
+                <label className="block">
+                  <span className="text-black">Payment Method</span>
+                  <select
+                    name="payment_method"
+                    value={formData.payment_method}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded mt-1 text-black"
+                  >
+                    <option value="">-- Select Payment Method --</option>
+                    <option value="momo_rwanda">MOMO (MTN Rwanda)</option>
+                    <option value="flutterwave">Flutterwave (MOMO, Airtel, Card, Bank Transfer)</option>
+                  </select>
+                </label>
+
+                {formData.payment_method === "momo_rwanda" && (
+                  <div>
+                    <label className="block">
+                      <span className="text-black">MoMo Phone Number</span>
+                      <input
+                        type="number"
+                        name="momo_number"
+                        placeholder="momo_number (e.g., 2507XXXXXXXX)"
+                        value={formData.momo_number}
+                        onChange={(e) => handleInputChange({ name: "momo_number", value: e.target.value })}
+                        className="w-full p-2 border rounded text-black"
+                       />
+                      <textarea
+                        name="extra_note"
+                        placeholder="Additional Notes (optional)"
+                        value={formData.extra_note}
+                        onChange={(e) => handleInputChange({ name: "extra_note", value: e.target.value })}
+                        className="w-full p-2 border rounded text-black"
+                      />
+
+                    </label>
+                  </div>
+                )}
+
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => setStep("form")}
+                    className="px-4 py-2 bg-gray-300 text-black rounded"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={sendOtp}
+                    disabled={isSending}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    {isSending ? "Sending OTP..." : "Continue"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+
+            {/* Step 3: OTP Verification */}
             {step === "otp" && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-black">Verify OTP</h2>
@@ -242,6 +315,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
               </div>
             )}
 
+            {/* Step 4: Success */}
             {step === "success" && (
               <div className="text-center space-y-4">
                 <h2 className="text-xl font-bold text-green-700">Booking Confirmed!</h2>
@@ -257,8 +331,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
           </div>
         </div>
       )}
-
-
     </>
   );
 };
