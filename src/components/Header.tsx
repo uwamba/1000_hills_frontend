@@ -12,6 +12,7 @@ export default function Header() {
           <Link href="/roomList" className="hover:underline">Hotels Rooms</Link>
           <Link href="/busListing" className="hover:underline">Bus Tickets</Link>
           <Link href="/apartmentsListing" className="hover:underline">Apartment</Link>
+          <Link href="/retreatsListing" className="hover:underline">Retreats</Link>
           <Link href="/contact" className="hover:underline">Contact</Link>
         </nav>
       </div>
