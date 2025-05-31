@@ -57,7 +57,7 @@ export default function RoomDetailComponent() {
   const [similarRooms, setSimilarRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const imageBaseUrl = 'http://127.0.0.1:8000/storage';
+ const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
   useEffect(() => {
     if (roomId) {

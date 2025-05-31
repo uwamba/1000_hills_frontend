@@ -128,7 +128,7 @@ export default function ApartmentListPage() {
     setPhotoInputs([...photoInputs, new File([], '')]);
   };
 
-  const imageBaseUrl = 'http://127.0.0.1:8000/storage';
+  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:3000/images';
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black">

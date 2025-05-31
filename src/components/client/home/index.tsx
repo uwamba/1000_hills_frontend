@@ -95,7 +95,7 @@ export default function Home() {
   const [loadingRetreats, setLoadingRetreats] = useState(true);
   const [loadingHotels, setLoadingHotels] = useState(true);
 
-  const imageBaseUrl = 'http://127.0.0.1:8000/storage';
+  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
   const fetchApartments = async () => {
     try {

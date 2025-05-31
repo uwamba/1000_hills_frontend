@@ -58,7 +58,7 @@ export default function RetreatList() {
         fetchRetreats(page);
     }, [page]);
 
-    const imageBaseUrl = 'http://127.0.0.1:8000/storage';
+     const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
     const openModal = (retreat: Retreat) => {
         setSelectedRetreat(retreat);

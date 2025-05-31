@@ -86,8 +86,7 @@ export default function RoomListClientPage() {
   const handleNext = () => {
     if (page < lastPage) setPage(page + 1);
   };
-
-  const imageBaseUrl = 'http://127.0.0.1:8000/storage';
+ const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">

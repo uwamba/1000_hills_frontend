@@ -62,7 +62,7 @@ export default function ApartmentList() {
     const handlePrev = () => page > 1 && setPage(page - 1);
     const handleNext = () => page < lastPage && setPage(page + 1);
 
-    const imageBaseUrl = 'http://127.0.0.1:8000/storage';
+    const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
     const openModal = (apartment: Apartment) => {
         setSelectedApartment(apartment);
