@@ -1,27 +1,100 @@
 {
   "compilerOptions": {
+    /*  
+     * Specifies the JavaScript language version for emitted JavaScript and for type
+     * checking. Next.js generally uses modern ES features, so "ESNext" or at least "ES2017" is fine.
+     */
     "target": "ES2017",
+
+    /*
+     * List of library files to be included in the compilation. 
+     * "dom", "dom.iterable", and "esnext" give you up-to-date DOM types, plus promises, iterators, etc.
+     */
     "lib": ["dom", "dom.iterable", "esnext"],
+
+    /*
+     * Allow importing JavaScript files (.js/.jsx) alongside .ts/.tsx if you have them in the codebase.
+     * This is typical in Next.js because you may mix JS and TS files.
+     */
     "allowJs": true,
+
+    /*
+     * Skip type-checking of declaration files (e.g., those in node_modules). 
+     * Makes installs/builds faster but be aware you won’t catch types mismatches inside dependencies.
+     */
     "skipLibCheck": true,
+
+    /*
+     * Enable all strict type-checking options. This helps catch more subtle bugs.
+     */
     "strict": true,
+
+    /*
+     * Do not emit compiled JavaScript—Next.js handles all the transpilation via Babel/Esbuild internally.
+     */
     "noEmit": true,
+
+    /*
+     * Allow default imports from modules with no default export. Enables `import X from "some-lib"`.
+     */
     "esModuleInterop": true,
+
+    /*
+     * Use "esnext" modules. Next.js uses ES Modules under the hood, so "esnext" is appropriate.
+     */
     "module": "esnext",
+
+    /*
+     * Resolve modules the way Node.js (or bundlers) do. "bundler" is the new recommendation in TS 5.0+, 
+     * but if you run into weird “cannot find module” issues, you can switch to "node" here.
+     */
     "moduleResolution": "bundler",
+
+    /*
+     * Allow importing JSON files directly (e.g. `import data from "./data.json"`).
+     */
     "resolveJsonModule": true,
+
+    /*
+     * Each file is transpiled in isolation (required for tools like SWC and Babel, which Next uses).
+     */
     "isolatedModules": true,
+
+    /*
+     * Keep JSX as JSX (Next’s Babel/Babel Engine will transform it). Don’t emit createElement calls.
+     */
     "jsx": "preserve",
+
+    /*
+     * Enable incremental builds (TypeScript caches info to speed up future builds).
+     */
     "incremental": true,
+
+    /*
+     * Special plugin entry that tells TypeScript to pick up Next.js–specific types like `NextPage`,
+     * `GetStaticProps`, etc. If you use additional custom TS plugins, list them here.
+     */
     "plugins": [
       {
         "name": "next"
       }
     ],
+
+    /*
+     * Path aliases—for instance, "@/components/Button" → "./src/components/Button".
+     * In Next.js, "baseUrl": "." is assumed if you define any "paths". If you see errors,
+     * you may need to add `"baseUrl": "."` explicitly.
+     */
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     }
   },
+
+  /*
+   * Include all TS/TSX files, plus Next’s special types in node_modules, 
+   * and exclude `node_modules` because you don’t want to type-check dependencies.
+   */
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
