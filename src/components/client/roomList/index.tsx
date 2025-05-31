@@ -151,7 +151,7 @@ export default function RoomListClientPage() {
   {filteredRooms.map((room) => (
     <Link
       key={room.id}
-      href={`/roomList/${room.id}`}
+      href={{ pathname: '/roomList/more', query: { roomId: room.id } }}
       className="block bg-white rounded-lg shadow-lg p-4 border border-gray-300 hover:shadow-2xl transition-transform transform hover:scale-105"
     >
       <div className="w-full h-48 mb-4 overflow-hidden rounded-lg">

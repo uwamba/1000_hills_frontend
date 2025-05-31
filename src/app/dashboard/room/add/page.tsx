@@ -123,7 +123,7 @@ export default function RoomForm() {
     });
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms`, {
         method: "POST",
         body: formPayload,
       });

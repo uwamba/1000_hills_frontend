@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import BookingForm from '../bookingForm';
 
+import { useSearchParams } from 'next/navigation';
+
+
+
 interface User {
   id: number;
   name: string;
@@ -46,7 +50,9 @@ interface Room {
 }
 
 export default function RoomDetailComponent() {
-  const { id } = useParams();
+    const searchParams = useSearchParams();
+  const roomId = searchParams.get('roomId');
+
   const [room, setRoom] = useState<Room | null>(null);
   const [similarRooms, setSimilarRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,10 +60,10 @@ export default function RoomDetailComponent() {
   const imageBaseUrl = 'http://127.0.0.1:8000/storage';
 
   useEffect(() => {
-    if (id) {
+    if (roomId) {
       const fetchRoom = async () => {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms/${id}`);
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms/${roomId}`);
           if (!res.ok) throw new Error('Failed to fetch room details');
           const data = await res.json();
           setRoom(data.room);
@@ -71,7 +77,7 @@ export default function RoomDetailComponent() {
 
       fetchRoom();
     }
-  }, [id]);
+  }, [roomId]);
 
   if (loading) {
     return <div className="p-6 text-center text-lg text-gray-500">Loading room details...</div>;
