@@ -14,6 +14,7 @@ export default function Header() {
           <Link href="/apartmentsListing" className="hover:underline">Apartment</Link>
           <Link href="/retreatsListing" className="hover:underline">Retreats</Link>
           <Link href="/contact" className="hover:underline">Contact</Link>
+          <Link href="/signin" className="hover:underline">Sign in</Link>
         </nav>
       </div>
     </header>

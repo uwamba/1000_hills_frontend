@@ -1,75 +1,66 @@
 "use client";
-import { useState } from 'react';
 
-interface FormDataType {
-  name: string;
-  number_of_bedroom: number;
-  kitchen_inside: boolean;
-  kitchen_outside: boolean;
-  number_of_floor: number;
-  address: string;
-  coordinate: {
-    lat: string;
-    lng: string;
-  };
-  annexes: string;
-  description: string;
-  status: string;
-  swimming_pool: boolean;
-  laundry: boolean;
-  gym: boolean;
-  room_service: boolean;
-  sauna_massage: boolean;
-}
+import { useState } from "react";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
-export default function ApartmentForm() {
-  const [formData, setFormData] = useState<FormDataType>({
-    name: '',
-    number_of_bedroom: 1,
-    kitchen_inside: false,
-    kitchen_outside: false,
-    number_of_floor: 1,
-    address: '',
-    coordinate: { lat: '', lng: '' },
-    annexes: '',
-    description: '',
-    status: '',
-    swimming_pool: false,
-    laundry: false,
-    gym: false,
-    room_service: false,
-    sauna_massage: false,
+const defaultApartmentData = {
+  name: "",
+  number_of_bedroom: 1,
+  kitchen_inside: false,
+  kitchen_outside: false,
+  number_of_floor: 1,
+  address: "",
+  coordinate: { lat: "", lng: "" },
+  annexes: "",
+  description: "",
+  status: "",
+  swimming_pool: false,
+  laundry: false,
+  gym: false,
+  room_service: false,
+  sauna_massage: false,
+  price_per_night: "",
+  monthly_price: "",
+};
+
+export default function ApartmentFormPage() {
+  const [formData, setFormData] = useState(defaultApartmentData);
+  const [photos, setPhotos] = useState<File[]>([]);
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
   });
 
-  const [photos, setPhotos] = useState<File[]>([]);
+  const center = {
+    lat: parseFloat(formData.coordinate.lat) || -1.9441,
+    lng: parseFloat(formData.coordinate.lng) || 30.0619,
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const target = e.target;
-    const { name, value, type } = target;
+    const { name, value, type } = e.target;
 
-    if (name === 'lat' || name === 'lng') {
-      setFormData((prevData) => ({
-        ...prevData,
-        coordinate: {
-          ...prevData.coordinate,
-          [name]: value,
-        },
+    if (name === "lat" || name === "lng") {
+      setFormData((prev) => ({
+        ...prev,
+        coordinate: { ...prev.coordinate, [name]: value },
       }));
-    } else if (type === 'checkbox' && target instanceof HTMLInputElement) {
-      setFormData((prevData) => ({
-        ...prevData,
+    } else if (type === "checkbox") {
+      // Use type assertion to safely access `checked`
+      const target = e.target as HTMLInputElement;
+      setFormData((prev) => ({
+        ...prev,
         [name]: target.checked,
       }));
-    } else if (name === 'number_of_bedroom' || name === 'number_of_floor') {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: parseInt(value),
+    } else if (name === "number_of_bedroom" || name === "number_of_floor") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: parseInt(value) || 1,
       }));
     } else {
-      setFormData((prevData) => ({
-        ...prevData,
+      setFormData((prev) => ({
+        ...prev,
         [name]: value,
       }));
     }
@@ -87,72 +78,74 @@ export default function ApartmentForm() {
     setPhotos([...photos, new File([], "")]);
   };
 
+  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+    const lat = e.latLng?.lat().toString() ?? "";
+    const lng = e.latLng?.lng().toString() ?? "";
+    if (lat && lng) {
+      setFormData((prev) => ({
+        ...prev,
+        coordinate: { lat, lng },
+      }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const formPayload = new FormData();
     formPayload.append("name", formData.name);
     formPayload.append("address", formData.address);
     formPayload.append("description", formData.description);
     formPayload.append("number_of_bedroom", formData.number_of_bedroom.toString());
-    formPayload.append("kitchen_inside", formData.kitchen_inside ? '1' : '0');
-    formPayload.append("kitchen_outside", formData.kitchen_outside ? '1' : '0');
+    formPayload.append("kitchen_inside", formData.kitchen_inside ? "1" : "0");
+    formPayload.append("kitchen_outside", formData.kitchen_outside ? "1" : "0");
     formPayload.append("number_of_floor", formData.number_of_floor.toString());
     formPayload.append("status", formData.status);
     formPayload.append("coordinate", `${formData.coordinate.lat},${formData.coordinate.lng}`);
     formPayload.append("annexes", formData.annexes);
-    formPayload.append("swimming_pool", formData.swimming_pool ? '1' : '0');
-    formPayload.append("laundry", formData.laundry ? '1' : '0');
-    formPayload.append("gym", formData.gym ? '1' : '0');
-    formPayload.append("room_service", formData.room_service ? '1' : '0');
-    formPayload.append("sauna_massage", formData.sauna_massage ? '1' : '0');
+    formPayload.append("swimming_pool", formData.swimming_pool ? "1" : "0");
+    formPayload.append("laundry", formData.laundry ? "1" : "0");
+    formPayload.append("gym", formData.gym ? "1" : "0");
+    formPayload.append("room_service", formData.room_service ? "1" : "0");
+    formPayload.append("sauna_massage", formData.sauna_massage ? "1" : "0");
+    formPayload.append("price_per_night", formData.price_per_night);
+    formPayload.append("monthly_price", formData.monthly_price);
 
     photos.forEach((photo) => {
-      if (photo instanceof File) {
+      if (photo instanceof File && photo.size > 0) {
         formPayload.append("photos[]", photo);
       }
     });
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments`, {
-        method: 'POST',
-        body: formPayload,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments`,
+        {
+          method: "POST",
+          body: formPayload,
+        }
+      );
 
       if (response.ok) {
-        alert('Apartment successfully added!');
-        setFormData({
-          name: '',
-          number_of_bedroom: 1,
-          kitchen_inside: false,
-          kitchen_outside: false,
-          number_of_floor: 1,
-          address: '',
-          coordinate: { lat: '', lng: '' },
-          annexes: '',
-          description: '',
-          status: '',
-          swimming_pool: false,
-          laundry: false,
-          gym: false,
-          room_service: false,
-          sauna_massage: false,
-        });
+        alert("Apartment successfully added!");
+        setFormData(defaultApartmentData);
         setPhotos([]);
       } else {
         const errorText = await response.text();
-        console.error('Server error:', errorText);
-        throw new Error('Failed to add apartment');
+        console.error("Server error:", errorText);
+        alert("Failed to add apartment.");
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('There was an error adding the apartment.');
+      console.error("Error:", error);
+      alert("There was an error adding the apartment.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-md space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Add New Apartment</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded space-y-6"
+    >
+      <h2 className="text-2xl font-bold text-gray-900">Add New Apartment</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -162,8 +155,8 @@ export default function ApartmentForm() {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
@@ -174,8 +167,8 @@ export default function ApartmentForm() {
             name="address"
             value={formData.address}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
@@ -186,8 +179,8 @@ export default function ApartmentForm() {
             name="lat"
             value={formData.coordinate.lat}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
@@ -198,8 +191,32 @@ export default function ApartmentForm() {
             name="lng"
             value={formData.coordinate.lng}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-900">Price Per Night</label>
+          <input
+            type="text"
+            name="price_per_night"
+            value={formData.price_per_night}
+            onChange={handleChange}
+            placeholder="Enter price per night"
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-900">Monthly Price</label>
+          <input
+            type="text"
+            name="monthly_price"
+            value={formData.monthly_price}
+            onChange={handleChange}
+            placeholder="Enter monthly price"
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
@@ -210,8 +227,8 @@ export default function ApartmentForm() {
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
@@ -223,8 +240,8 @@ export default function ApartmentForm() {
             value={formData.number_of_bedroom}
             onChange={handleChange}
             min={1}
-            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
@@ -236,8 +253,8 @@ export default function ApartmentForm() {
             value={formData.number_of_floor}
             onChange={handleChange}
             min={1}
-            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
@@ -268,7 +285,7 @@ export default function ApartmentForm() {
             name="annexes"
             value={formData.annexes}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
@@ -278,8 +295,8 @@ export default function ApartmentForm() {
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="w-full p-2 mt-1 text-gray-900 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
             required
+            className="w-full p-2 border border-gray-300 rounded"
           >
             <option value="">Select Status</option>
             <option value="active">Active</option>
@@ -287,20 +304,21 @@ export default function ApartmentForm() {
           </select>
         </div>
 
-        {/* Services Checkboxes */}
         <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
           {[
-            { label: 'Swimming Pool', name: 'swimming_pool' },
-            { label: 'Laundry', name: 'laundry' },
-            { label: 'Gym', name: 'gym' },
-            { label: 'Room Service', name: 'room_service' },
-            { label: 'Sauna Massage', name: 'sauna_massage' },
+            { label: "Swimming Pool", name: "swimming_pool" },
+            { label: "Laundry", name: "laundry" },
+            { label: "Gym", name: "gym" },
+            { label: "Room Service", name: "room_service" },
+            { label: "Sauna Massage", name: "sauna_massage" },
           ].map((service) => (
             <div key={service.name} className="flex items-center gap-2">
               <input
                 type="checkbox"
                 name={service.name}
-                checked={formData[service.name as keyof FormDataType] as boolean}
+                checked={
+                  formData[service.name as keyof typeof defaultApartmentData] as boolean
+                }
                 onChange={handleChange}
               />
               <label className="text-gray-900">{service.label}</label>
@@ -309,7 +327,19 @@ export default function ApartmentForm() {
         </div>
       </div>
 
-      {/* Photo Upload Section */}
+      {isLoaded && (
+        <div className="h-64 mt-4">
+          <GoogleMap
+            center={center}
+            zoom={15}
+            mapContainerClassName="w-full h-full rounded"
+            onClick={handleMapClick}
+          >
+            <Marker position={center} />
+          </GoogleMap>
+        </div>
+      )}
+
       <div>
         <label className="block text-sm font-medium text-gray-900 mb-2">Photos</label>
         <div className="space-y-2">
@@ -319,7 +349,7 @@ export default function ApartmentForm() {
               type="file"
               accept="image/*"
               onChange={(e) => handlePhotoChange(index, e)}
-              className="block w-full text-sm text-gray-900 border border-gray-300 rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="block w-full text-sm border border-gray-300 rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
           ))}
         </div>
@@ -335,7 +365,7 @@ export default function ApartmentForm() {
       <div>
         <button
           type="submit"
-          className="w-full py-3 text-white bg-blue-700 rounded hover:bg-blue-800 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="w-full py-3 text-white bg-blue-700 rounded hover:bg-blue-800"
         >
           Submit Apartment
         </button>
