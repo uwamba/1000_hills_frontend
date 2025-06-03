@@ -33,10 +33,17 @@ export default function ApartmentListPage() {
   const [selectedApartment, setSelectedApartment] = useState<Apartment | null>(null);
   const [photoInputs, setPhotoInputs] = useState<File[]>([]);
 
+  // Replace this with actual token retrieval logic (localStorage, cookies, etc.)
+  const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+
   const fetchApartments = async (page: number) => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments?page=${page}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments?page=${page}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
       if (!res.ok) throw new Error('Failed to fetch apartments');
       const json: ApartmentResponse = await res.json();
       setApartments(json.data);
@@ -70,6 +77,9 @@ export default function ApartmentListPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments/${selectedApartment.id}`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
         body: formData,
       });
 
@@ -87,6 +97,9 @@ export default function ApartmentListPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments/${id}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
       });
       if (!res.ok) throw new Error('Failed to delete apartment');
       fetchApartments(page);
@@ -101,6 +114,9 @@ export default function ApartmentListPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/photos/${photoId}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
       });
       if (!res.ok) throw new Error('Failed to delete photo');
 

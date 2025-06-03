@@ -24,10 +24,27 @@ export default function AgencyListPage() {
   const [loading, setLoading] = useState(true);
   const [editingAgency, setEditingAgency] = useState<Agency | null>(null);
 
+  // Function to get the auth token from localStorage
+  const getAuthToken = () => {
+    return localStorage.getItem('authToken');
+  };
+
   useEffect(() => {
     const fetchAgencies = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/agencies`);
+        const token = getAuthToken();
+        if (!token) {
+          console.error('No auth token found.');
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/agencies`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         if (!res.ok) throw new Error('Failed to fetch agencies');
 
         const json = await res.json();
@@ -48,8 +65,17 @@ export default function AgencyListPage() {
     if (!confirm('Are you sure you want to delete this agency?')) return;
 
     try {
+      const token = getAuthToken();
+      if (!token) {
+        console.error('No auth token found.');
+        return;
+      }
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/agencies/${id}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) throw new Error('Delete failed');
@@ -57,6 +83,37 @@ export default function AgencyListPage() {
       setAgencies((prev) => prev.filter((a) => a.id !== id));
     } catch (error) {
       console.error('Error deleting agency:', error);
+    }
+  };
+
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        console.error('No auth token found.');
+        return;
+      }
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/agencies/${editingAgency!.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editingAgency),
+      });
+
+      if (!res.ok) throw new Error('Failed to update agency');
+
+      const updatedAgency = await res.json();
+      setAgencies((prev) =>
+        prev.map((a) => (a.id === updatedAgency.data.id ? updatedAgency.data : a))
+      );
+      setEditingAgency(null);
+    } catch (error) {
+      console.error('Update failed:', error);
     }
   };
 
@@ -134,31 +191,7 @@ export default function AgencyListPage() {
           <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl">
             <h2 className="text-xl font-bold mb-4">Edit Agency</h2>
 
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-
-                try {
-                  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/agencies/${editingAgency.id}`, {
-                    method: 'PUT',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(editingAgency),
-                  });
-
-                  if (!res.ok) throw new Error('Failed to update agency');
-
-                  const updatedAgency = await res.json();
-                  setAgencies((prev) =>
-                    prev.map((a) => (a.id === updatedAgency.data.id ? updatedAgency.data : a))
-                  );
-                  setEditingAgency(null);
-                } catch (error) {
-                  console.error('Update failed:', error);
-                }
-              }}
-            >
+            <form onSubmit={handleUpdate}>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">Name</label>
                 <input
@@ -174,7 +207,9 @@ export default function AgencyListPage() {
                 <input
                   type="text"
                   value={editingAgency.address}
-                  onChange={(e) => setEditingAgency({ ...editingAgency, address: e.target.value })}
+                  onChange={(e) =>
+                    setEditingAgency({ ...editingAgency, address: e.target.value })
+                  }
                   className="w-full border rounded p-2"
                   required
                 />
@@ -183,7 +218,9 @@ export default function AgencyListPage() {
                 <label className="block text-sm font-medium text-gray-700">Description</label>
                 <textarea
                   value={editingAgency.description}
-                  onChange={(e) => setEditingAgency({ ...editingAgency, description: e.target.value })}
+                  onChange={(e) =>
+                    setEditingAgency({ ...editingAgency, description: e.target.value })
+                  }
                   className="w-full border rounded p-2"
                   rows={3}
                   required
@@ -198,7 +235,10 @@ export default function AgencyListPage() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
                   Save
                 </button>
               </div>

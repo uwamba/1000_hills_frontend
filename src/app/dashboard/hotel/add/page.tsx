@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
 interface FormDataType {
@@ -18,16 +18,25 @@ interface FormDataType {
 
 export default function HotelForm() {
   const [formData, setFormData] = useState<FormDataType>({
-    name: '',
-    address: '',
-    coordinate: { lat: '', lng: '' },
-    description: '',
+    name: "",
+    address: "",
+    coordinate: { lat: "", lng: "" },
+    description: "",
     stars: 1,
-    working_time: '',
-    status: '',
+    working_time: "",
+    status: "",
   });
 
   const [photos, setPhotos] = useState<File[]>([]);
+  const [authToken, setAuthToken] = useState<string>("");
+
+  useEffect(() => {
+    // Retrieve authToken from localStorage or other secure storage
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      setAuthToken(token);
+    }
+  }, []);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
@@ -86,6 +95,7 @@ export default function HotelForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const formPayload = new FormData();
     formPayload.append("name", formData.name);
     formPayload.append("address", formData.address);
@@ -93,7 +103,10 @@ export default function HotelForm() {
     formPayload.append("stars", formData.stars.toString());
     formPayload.append("working_time", formData.working_time);
     formPayload.append("status", formData.status);
-    formPayload.append("coordinate", `${formData.coordinate.lat},${formData.coordinate.lng}`);
+    formPayload.append(
+      "coordinate",
+      `${formData.coordinate.lat},${formData.coordinate.lng}`
+    );
 
     photos.forEach((photo) => {
       if (photo instanceof File && photo.size > 0) {
@@ -106,6 +119,9 @@ export default function HotelForm() {
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
           body: formPayload,
         }
       );
@@ -113,13 +129,13 @@ export default function HotelForm() {
       if (response.ok) {
         alert("Hotel successfully added!");
         setFormData({
-          name: '',
-          address: '',
-          coordinate: { lat: '', lng: '' },
-          description: '',
+          name: "",
+          address: "",
+          coordinate: { lat: "", lng: "" },
+          description: "",
           stars: 1,
-          working_time: '',
-          status: '',
+          working_time: "",
+          status: "",
         });
         setPhotos([]);
       } else {

@@ -47,7 +47,6 @@ export default function ApartmentFormPage() {
         coordinate: { ...prev.coordinate, [name]: value },
       }));
     } else if (type === "checkbox") {
-      // Use type assertion to safely access `checked`
       const target = e.target as HTMLInputElement;
       setFormData((prev) => ({
         ...prev,
@@ -91,6 +90,7 @@ export default function ApartmentFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const formPayload = new FormData();
     formPayload.append("name", formData.name);
     formPayload.append("address", formData.address);
@@ -117,10 +117,15 @@ export default function ApartmentFormPage() {
     });
 
     try {
+      const authToken = localStorage.getItem("authToken");
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken || ""}`,
+          },
           body: formPayload,
         }
       );

@@ -18,7 +18,6 @@ interface FormDataType {
   has_ac: boolean;
   hotel_id: number | string;
   status: string;
-
   has_swimming_pool: boolean;
   has_laundry: boolean;
   has_gym: boolean;
@@ -41,7 +40,6 @@ export default function RoomForm() {
     has_ac: false,
     hotel_id: "",
     status: "",
-
     has_swimming_pool: false,
     has_laundry: false,
     has_gym: false,
@@ -54,21 +52,37 @@ export default function RoomForm() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
 
+  // Get authToken from localStorage
+  const authToken =
+    typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+
   useEffect(() => {
     const fetchHotels = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels/names`
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels/names`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
         );
+        if (!response.ok) {
+          throw new Error("Failed to fetch hotel names");
+        }
         const data = await response.json();
         setHotels(data);
       } catch (error) {
-        console.error("Failed to fetch hotel names", error);
+        console.error("Failed to fetch hotel names:", error);
       }
     };
 
-    fetchHotels();
-  }, []);
+    if (authToken) {
+      fetchHotels();
+    } else {
+      console.warn("No authToken found in localStorage.");
+    }
+  }, [authToken]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -107,6 +121,11 @@ export default function RoomForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!authToken) {
+      alert("Authentication token not found. Please log in.");
+      return;
+    }
+
     const formPayload = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
       if (typeof value === "boolean") {
@@ -123,10 +142,16 @@ export default function RoomForm() {
     });
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms`, {
-        method: "POST",
-        body: formPayload,
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: formPayload,
+        }
+      );
 
       if (response.ok) {
         alert("Room successfully added!");
@@ -142,7 +167,6 @@ export default function RoomForm() {
           has_ac: false,
           hotel_id: "",
           status: "",
-
           has_swimming_pool: false,
           has_laundry: false,
           has_gym: false,
@@ -155,7 +179,7 @@ export default function RoomForm() {
       } else {
         const errorText = await response.text();
         console.error("Server error:", errorText);
-        throw new Error("Failed to add room");
+        alert("Failed to add room. Server error.");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -181,7 +205,9 @@ export default function RoomForm() {
           { name: "number_of_people", label: "Number of People", type: "number" },
         ].map(({ name, label, type }) => (
           <div key={name}>
-            <label className="block text-sm font-medium text-gray-800">{label}</label>
+            <label className="block text-sm font-medium text-gray-800">
+              {label}
+            </label>
             <input
               type={type}
               name={name}
@@ -232,7 +258,9 @@ export default function RoomForm() {
         ))}
 
         <div>
-          <label className="block text-sm font-medium text-gray-800">Hotel</label>
+          <label className="block text-sm font-medium text-gray-800">
+            Hotel
+          </label>
           <select
             name="hotel_id"
             value={formData.hotel_id}
@@ -250,7 +278,9 @@ export default function RoomForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-800">Status</label>
+          <label className="block text-sm font-medium text-gray-800">
+            Status
+          </label>
           <select
             name="status"
             value={formData.status}
@@ -266,7 +296,9 @@ export default function RoomForm() {
       </div>
 
       <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-800 mb-2">Photos</label>
+        <label className="block text-sm font-medium text-gray-800 mb-2">
+          Photos
+        </label>
         <div className="space-y-2">
           {photos.map((_, index) => (
             <input

@@ -33,10 +33,16 @@ export default function HotelListPage() {
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
   const [photoInputs, setPhotoInputs] = useState<File[]>([]);
 
+  const authToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+
   const fetchHotels = async (page: number) => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels?page=${page}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels?page=${page}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
       if (!res.ok) throw new Error('Failed to fetch hotels');
       const json: HotelResponse = await res.json();
       setHotels(json.data);
@@ -50,8 +56,10 @@ export default function HotelListPage() {
   };
 
   useEffect(() => {
-    fetchHotels(page);
-  }, [page]);
+    if (authToken) {
+      fetchHotels(page);
+    }
+  }, [page, authToken]);
 
   const handlePrev = () => page > 1 && setPage(page - 1);
   const handleNext = () => page < lastPage && setPage(page + 1);
@@ -70,6 +78,9 @@ export default function HotelListPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels/${selectedHotel.id}`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
         body: formData,
       });
 
@@ -87,6 +98,9 @@ export default function HotelListPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels/${id}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
       });
       if (!res.ok) throw new Error('Failed to delete hotel');
       fetchHotels(page);
@@ -101,6 +115,9 @@ export default function HotelListPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/photos/${photoId}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
       });
       if (!res.ok) throw new Error('Failed to delete photo');
 
@@ -128,13 +145,12 @@ export default function HotelListPage() {
     setPhotoInputs([...photoInputs, new File([], '')]);
   };
 
- const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
+  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black">
       <h1 className="text-3xl font-extrabold text-black mb-6">Hotel List</h1>
 
-      {/* Hotel Listing */}
       {loading ? (
         <div className="text-center text-lg text-gray-800 font-medium">Loading hotels...</div>
       ) : hotels.length === 0 ? (

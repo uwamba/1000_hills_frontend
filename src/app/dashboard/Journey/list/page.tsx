@@ -53,13 +53,26 @@ export default function JourneyListPage() {
   const [page, setPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
 
+  const getAuthToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('authToken');
+    }
+    return null;
+  };
+
   const fetchJourneys = async (page: number) => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys?page=${page}`);
-      if (!res.ok) throw new Error('Failed to fetch journeys');
-      const json: JourneyResponse = await res.json();
+      const authToken = getAuthToken();
 
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys?page=${page}`, {
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
+      });
+      if (!res.ok) throw new Error('Failed to fetch journeys');
+
+      const json: JourneyResponse = await res.json();
       setJourneys(json.data);
       setPage(json.current_page);
       setLastPage(json.last_page);
@@ -85,9 +98,14 @@ export default function JourneyListPage() {
   const toggleApproval = async (id: number, currentStatus: string | null) => {
     try {
       const newStatus = currentStatus === 'approved' ? 'pending' : 'approved';
+      const authToken = getAuthToken();
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys/${id}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -102,8 +120,12 @@ export default function JourneyListPage() {
     if (!confirm('Are you sure you want to delete this journey?')) return;
 
     try {
+      const authToken = getAuthToken();
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+        },
       });
 
       if (!res.ok) throw new Error('Failed to delete journey');
@@ -156,20 +178,20 @@ export default function JourneyListPage() {
                     <p className="text-sm text-gray-600 ml-2">
                       <span className="font-medium">Address:</span> {journey.bus.agency.address}
                       <br />
-                      <span className="font-medium">Description:</span>{' '}
-                      {journey.bus.agency.description}
+                      <span className="font-medium">Description:</span> {journey.bus.agency.description}
                     </p>
                     <p>
                       <span className="font-semibold">Layout:</span> {journey.bus.layout.name}{' '}
                       ({journey.bus.layout.row}x{journey.bus.layout.column})
                     </p>
                     <p className="text-sm text-gray-600 ml-2">
-                      <span className="font-medium">Seat Rows:</span>{' '}
-                      {journey.bus.layout.seat_row}, <span className="font-medium">Columns:</span>{' '}
-                      {journey.bus.layout.seat_column}
+                      <span className="font-medium">Seat Rows:</span> {journey.bus.layout.seat_row},{' '}
+                      <span className="font-medium">Columns:</span> {journey.bus.layout.seat_column}
                       <br />
                       {journey.bus.layout.exclude && (
-                        <span className="font-medium text-red-500">Excluded: {journey.bus.layout.exclude}</span>
+                        <span className="font-medium text-red-500">
+                          Excluded: {journey.bus.layout.exclude}
+                        </span>
                       )}
                     </p>
                   </div>
@@ -178,7 +200,9 @@ export default function JourneyListPage() {
                 <div className="mt-2 text-sm text-gray-600 space-y-1">
                   <div>
                     <span className="font-medium">Status:</span>{' '}
-                    <span className={journey.status === 'approved' ? 'text-green-600' : 'text-yellow-600'}>
+                    <span
+                      className={journey.status === 'approved' ? 'text-green-600' : 'text-yellow-600'}
+                    >
                       {journey.status || 'N/A'}
                     </span>
                   </div>
@@ -190,7 +214,6 @@ export default function JourneyListPage() {
                   )}
                 </div>
 
-                {/* Action Buttons */}
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     onClick={() => toggleApproval(journey.id, journey.status)}
@@ -212,7 +235,6 @@ export default function JourneyListPage() {
             ))}
           </div>
 
-          {/* Pagination Controls */}
           <div className="mt-8 flex justify-center space-x-4">
             <button
               onClick={handlePrev}
