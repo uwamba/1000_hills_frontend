@@ -32,7 +32,7 @@ export default function SignInPage() {
       localStorage.setItem("authToken", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      router.push("/admin/dashboard");
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.message);
     }

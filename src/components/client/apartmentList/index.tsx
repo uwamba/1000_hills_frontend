@@ -5,7 +5,7 @@ import { Dialog } from '@headlessui/react';
 
 interface Photo {
     id: number;
-    path: string;
+    url: string;
 }
 
 interface Apartment {
@@ -44,6 +44,8 @@ export default function ApartmentList() {
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments?page=${page}`);
             if (!res.ok) throw new Error('Failed to fetch apartments');
             const json: ApartmentResponse = await res.json();
+
+            console.log('Fetched apartments:', json.data);
 
             setApartments(json.data);
             setPage(json.current_page);
@@ -101,7 +103,7 @@ export default function ApartmentList() {
                                     <img
                                         src={
                                             apartment.photos?.length > 0
-                                                ? `${imageBaseUrl}/${apartment.photos[0].path}`
+                                                ? `${imageBaseUrl}/${apartment.photos[0].url}`
                                                 : '/placeholder.jpg'
                                         }
                                         alt={apartment.name}
@@ -182,7 +184,7 @@ export default function ApartmentList() {
                                         {/* Main Photo */}
                                         <div className="w-full h-96 mb-4 rounded overflow-hidden border">
                                             <img
-                                                src={`${imageBaseUrl}/${selectedApartment.photos[selectedPhotoIndex].path}`}
+                                                src={`${imageBaseUrl}/${selectedApartment.photos[selectedPhotoIndex].url}`}
                                                 alt="Main"
                                                 className="w-full h-full object-cover"
                                             />
@@ -193,7 +195,7 @@ export default function ApartmentList() {
                                             {selectedApartment.photos.map((photo, index) => (
                                                 <img
                                                     key={photo.id}
-                                                    src={`${imageBaseUrl}/${photo.path}`}
+                                                    src={`${imageBaseUrl}/${photo.url}`}
                                                     onClick={() => setSelectedPhotoIndex(index)}
                                                     className={`w-24 h-24 object-cover rounded cursor-pointer border-2 ${index === selectedPhotoIndex
                                                         ? 'border-indigo-500'

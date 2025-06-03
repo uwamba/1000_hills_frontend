@@ -8,6 +8,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 interface Photo {
   id: number;
   path: string;
+  url: string;
 }
 
 interface Apartment {
@@ -258,7 +259,7 @@ export default function Home() {
                 <img
                   src={
                     apartment.photos.length > 0
-                      ? `${imageBaseUrl}/${apartment.photos[0].path}`
+                      ? `${imageBaseUrl}/${apartment.photos[0].url}`
                       : "/placeholder.jpg"
                   }
                   alt={apartment.name}
