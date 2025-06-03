@@ -36,11 +36,25 @@ export default function RoomListClientPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [capacityFilter, setCapacityFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+    const [authToken, setAuthToken] = useState<string | null>(null);
+
+    useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error('Authentication required. Please log in.');
+    } else {
+      setAuthToken(token);
+    }
+  }, []);
 
   const fetchRooms = async (page: number) => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms?page=${page}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms?page=${page}`
+        , {
+        headers: { Authorization: `Bearer ${authToken}` },
+      }
+      );
       if (!res.ok) throw new Error('Failed to fetch rooms');
       const json: RoomResponse = await res.json();
 
@@ -54,10 +68,10 @@ export default function RoomListClientPage() {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
-    fetchRooms(page);
-  }, [page]);
+    if (authToken) fetchRooms(page);
+  }, [authToken, page]);
 
   useEffect(() => {
     let filtered = rooms;
