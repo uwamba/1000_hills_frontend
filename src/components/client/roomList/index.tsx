@@ -51,7 +51,7 @@ export default function RoomListClientPage() {
   try {
     setLoading(true);
     
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms?page=${page}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/rooms?page=${page}`, {
       method: "GET",
       headers: { 
         Authorization: `Bearer ${authToken}` ,

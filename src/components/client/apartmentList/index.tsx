@@ -41,7 +41,7 @@ export default function ApartmentList() {
     const fetchApartments = async (page: number) => {
         try {
             setLoading(true);
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments?page=${page}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/apartments?page=${page}`);
             if (!res.ok) throw new Error('Failed to fetch apartments');
             const json: ApartmentResponse = await res.json();
 
