@@ -48,27 +48,35 @@ export default function RoomListClientPage() {
   }, []);
 
   const fetchRooms = async (page: number) => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms?page=${page}`
-        , {
-        headers: { Authorization: `Bearer ${authToken}` },
-      }
-      );
-      if (!res.ok) throw new Error('Failed to fetch rooms');
-      const json: RoomResponse = await res.json();
+  try {
+    setLoading(true);
+    
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms?page=${page}`, {
+      method: "GET",
+      headers: { 
+        Authorization: `Bearer ${authToken}` ,
+        Accept: "application/json",
+      },
+      
+    });
 
-      setRooms(json.data);
-      setFilteredRooms(json.data); // Initially unfiltered
-      setPage(json.current_page);
-      setLastPage(json.last_page);
-    } catch (error) {
-      console.error('Error fetching rooms:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
+    if (!res.ok) throw new Error('Failed to fetch roomss');
+    
+    const json: RoomResponse = await res.json();
+    console.log('Fetched rooms response:', json);
+
+    setRooms(json.data);
+    setFilteredRooms(json.data); // Initially unfiltered
+    setPage(json.current_page);
+    setLastPage(json.last_page);
+    
+  } catch (error) {
+    console.error('Error fetching rooms:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
   useEffect(() => {
     if (authToken) fetchRooms(page);
   }, [authToken, page]);

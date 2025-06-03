@@ -40,20 +40,31 @@ export default function RoomListPage() {
     const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
   const fetchRooms = async (page: number) => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms?page=${page}`);
-      if (!res.ok) throw new Error('Failed to fetch rooms');
-      const json: RoomResponse = await res.json();
-      setRooms(json.data);
-      setPage(json.current_page);
-      setLastPage(json.last_page);
-    } catch (error) {
-      console.error('Error fetching rooms:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+
+    const authToken = localStorage.getItem('authToken'); // or use a context/provider if you have one
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms?page=${page}`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        Accept: 'application/json',
+      },
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch rooms');
+    const json: RoomResponse = await res.json();
+
+    setRooms(json.data);
+    setPage(json.current_page);
+    setLastPage(json.last_page);
+  } catch (error) {
+    console.error('Error fetching rooms:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchRooms(page);
