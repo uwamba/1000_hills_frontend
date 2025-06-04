@@ -122,11 +122,12 @@ export default function AddRetreatPage() {
           formDataPayload.append("photos[]", photo);
         }
       });
-  
+   const authToken = localStorage.getItem("authToken"); 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/retreats`, {
         method: "POST",
         headers: {
           Accept: "application/json",
+          Authorization: `Bearer ${authToken}`, // Ensure you have the auth token
           // ⚠️ DO NOT manually set Content-Type for FormData
           // 'Content-Type': 'multipart/form-data', // REMOVE THIS LINE if you have it elsewhere
         },

@@ -19,7 +19,15 @@ export default function BusLayoutsPage() {
   useEffect(() => {
     const fetchLayouts = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/seat-types`);
+        const authToken = localStorage.getItem('authToken'); // or use a context/provider if you have one
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/seat-types`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            Accept: 'application/json',
+          },
+        });
+        if (!res.ok) throw new Error('Failed to fetch bus layouts');
         const data = await res.json();
         console.log("Bus layout response:", data);
         setBuses(data?.data || []);

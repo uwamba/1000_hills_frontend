@@ -64,7 +64,7 @@ export default function BusList() {
   const fetchJourneys = async (pageNum: number) => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys?page=${pageNum}&limit=${limit}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/journeys?page=${pageNum}&limit=${limit}`);
       if (!response.ok) throw new Error('Failed to fetch journeys');
       const json: JourneyResponse = await response.json();
         console.log("Journey response:", response.json());

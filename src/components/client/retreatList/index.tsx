@@ -40,7 +40,7 @@ export default function RetreatList() {
     const fetchRetreats = async (page: number) => {
         try {
             setLoading(true);
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/retreats?page=${page}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/retreats?page=${page}`);
             if (!res.ok) throw new Error('Failed to fetch retreats');
             const json: RetreatResponse = await res.json();
 

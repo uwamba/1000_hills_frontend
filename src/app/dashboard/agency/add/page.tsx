@@ -30,9 +30,13 @@ export default function AgencyForm() {
     e.preventDefault();
 
     try {
+
+      const authToken = localStorage.getItem("authToken"); // Ensure you have the auth token stored in localStorage
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/agencies`, {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${authToken}`, // Ensure you have the auth token
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),

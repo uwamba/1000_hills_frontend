@@ -92,8 +92,15 @@ export default function BusForm() {
     payload.append("exclude", JSON.stringify(Array.from(excludedSeats)));
 
     try {
+
+
+      const authToken = localStorage.getItem('authToken'); // or use a context/provider if you have one
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/seat-types`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`, // Ensure you have the auth token
+        },
         body: payload,
       });
 
@@ -138,9 +145,8 @@ export default function BusForm() {
         rowSeats.push(
           <div
             key={currentSeatId}
-            className={`w-8 h-8 rounded text-xs flex items-center justify-center cursor-pointer font-bold ${
-              isExcluded ? "bg-red-700 text-white" : "bg-green-700 text-white"
-            }`}
+            className={`w-8 h-8 rounded text-xs flex items-center justify-center cursor-pointer font-bold ${isExcluded ? "bg-red-700 text-white" : "bg-green-700 text-white"
+              }`}
             onClick={() => toggleSeatExclusion(currentSeatId)}
             title={`Seat ${currentSeatId}`}
           >
@@ -265,11 +271,10 @@ export default function BusForm() {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-3 px-4 rounded-md text-white text-base font-bold transition ${
-            loading
+          className={`w-full py-3 px-4 rounded-md text-white text-base font-bold transition ${loading
               ? "bg-gray-600 cursor-not-allowed"
               : "bg-blue-800 hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-          }`}
+            }`}
         >
           {loading ? "Submitting..." : "Submit"}
         </button>

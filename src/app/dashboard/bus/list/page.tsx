@@ -40,9 +40,20 @@ export default function BusListPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
+
     const fetchBuses = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/buses`);
+
+        const authToken = localStorage.getItem('authToken'); // or use a context/provider if you have one
+
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/buses`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            Accept: 'application/json',
+          },
+        });
+
         if (!res.ok) throw new Error('Failed to fetch buses');
 
         const json = await res.json();
@@ -74,9 +85,8 @@ export default function BusListPage() {
         rowSeats.push(
           <div
             key={seatId}
-            className={`w-8 h-8 border rounded flex items-center justify-center text-xs ${
-              isExcluded ? "bg-gray-500 text-white" : "bg-green-300 text-black"
-            }`}
+            className={`w-8 h-8 border rounded flex items-center justify-center text-xs ${isExcluded ? "bg-gray-500 text-white" : "bg-green-300 text-black"
+              }`}
           >
             {isExcluded ? (
               <FaTimes className="text-white" />

@@ -27,7 +27,14 @@ export default function AddJourneyPage() {
 
     const fetchBuses = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/buses`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/buses`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Ensure you have the auth token
+            },
+          }
+        );
         if (!res.ok) throw new Error('Failed to fetch buses');
 
         const json = await res.json();
@@ -51,9 +58,12 @@ export default function AddJourneyPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const authToken = localStorage.getItem("authToken"); 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 
+          Authorization: `Bearer ${authToken}`  // Ensure you have the auth token
+        },
         body: JSON.stringify(formData),
       });
 

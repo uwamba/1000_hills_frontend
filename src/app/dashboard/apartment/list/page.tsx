@@ -4,7 +4,7 @@ import { useEffect, useState, FormEvent, ChangeEvent } from 'react';
 
 interface Photo {
   id: number;
-  path: string;
+  url: string;
 }
 
 interface Apartment {
@@ -23,6 +23,9 @@ interface ApartmentResponse {
   last_page: number;
   data: Apartment[];
 }
+
+
+
 
 export default function ApartmentListPage() {
   const [apartments, setApartments] = useState<Apartment[]>([]);
@@ -55,6 +58,8 @@ export default function ApartmentListPage() {
       setLoading(false);
     }
   };
+
+  
 
   useEffect(() => {
     fetchApartments(page);
@@ -144,7 +149,7 @@ export default function ApartmentListPage() {
     setPhotoInputs([...photoInputs, new File([], '')]);
   };
 
-  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || 'http://localhost:3000/images';
+  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black">
@@ -160,12 +165,13 @@ export default function ApartmentListPage() {
             {apartments.map((apartment) => (
               <div key={apartment.id} className="bg-white p-4 rounded shadow">
                 <img
-                  src={apartment.photos[0] ? `${imageBaseUrl}/${apartment.photos[0].path}` : '/placeholder.jpg'}
+                  src={apartment.photos[0] ? `${imageBaseUrl}/${apartment.photos[0].url}` : '/placeholder.jpg'}
                   className="w-full h-48 object-cover rounded"
                 />
                 <h2 className="text-xl font-bold mt-2">{apartment.name}</h2>
                 <p>{apartment.location}</p>
                 <p>{apartment.description}</p>
+                <p>{apartment.photos[0].url}</p>
                 <p>Rooms: {apartment.rooms}</p>
                 <p>Status: {apartment.status ?? 'N/A'}</p>
                 {apartment.deleted_on && <p className="text-red-600">Deleted On: {new Date(apartment.deleted_on).toLocaleDateString()}</p>}
@@ -225,7 +231,7 @@ export default function ApartmentListPage() {
                 <div className="flex gap-2 flex-wrap">
                   {selectedApartment.photos.map((photo) => (
                     <div key={photo.id} className="relative group">
-                      <img src={`${imageBaseUrl}/${photo.path}`} className="w-24 h-24 object-cover rounded border" />
+                      <img src={`${imageBaseUrl}/${photo.url}`} className="w-24 h-24 object-cover rounded border" />
                       <button
                         type="button"
                         onClick={() => handlePhotoDelete(photo.id)}

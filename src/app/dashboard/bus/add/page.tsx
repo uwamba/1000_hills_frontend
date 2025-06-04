@@ -34,8 +34,19 @@ export default function CreateBusPage() {
 
     useEffect(() => {
         // Fetch agencies
+        const authToken = localStorage.getItem("authToken"); 
         const fetchAgencies = async () => {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/agencies`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/agencies`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${authToken}`, // Ensure you have the auth token
+
+                        
+                    },
+                }
+            );
             const data = await res.json();
             setAgencies(data?.data || []);
         };
@@ -58,8 +69,12 @@ export default function CreateBusPage() {
         payload.append("status", formData.status);
 
         try {
+            const authToken = localStorage.getItem("authToken"); 
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/buses`, {
                 method: "POST",
+                headers: {
+                    Authorization: `Bearer ${authToken}`, // Ensure you have the auth token
+                },
                 body: payload,
             });
 
@@ -86,7 +101,16 @@ export default function CreateBusPage() {
     const openSeatTypeModal = async () => {
         setLoadingLayouts(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/seat-types`);
+            const authToken = localStorage.getItem("authToken"); 
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/seat-types`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${authToken}`, // Ensure you have the auth token
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
             const data = await res.json();
             setSeatLayouts(data?.data || []);
             setIsModalOpen(true);

@@ -101,7 +101,7 @@ export default function Home() {
   const fetchApartments = async () => {
     try {
       setLoadingApartments(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments?page=1`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/apartments?page=1`);
       if (!res.ok) throw new Error('Failed to fetch apartments');
       const json: ApartmentResponse = await res.json();
       setApartments(json.data);
@@ -115,7 +115,7 @@ export default function Home() {
   const fetchRetreats = async () => {
     try {
       setLoadingRetreats(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/retreats?page=1`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/retreats?page=1`);
       if (!res.ok) throw new Error('Failed to fetch retreats');
       const json: RetreatResponse = await res.json();
       setRetreats(json.data);
@@ -129,7 +129,7 @@ export default function Home() {
   const fetchRooms = async () => {
     try {
       setLoadingHotels(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms?page=1`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/rooms?page=1`);
       if (!res.ok) throw new Error('Failed to fetch hotels');
       const json: HotelResponse = await res.json();
       setHotels(json.data);
