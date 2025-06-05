@@ -43,9 +43,11 @@ export default function DashboardSidebar() {
                     open={openManagement}
                     toggle={() => setOpenManagement(!openManagement)}
                 >
-                    <SidebarSubItem href="/dashboard/users" label="Users" icon={<UserPlus size={18} />} />
-                    <SidebarSubItem href="/dashboard/roles" label="Roles" icon={<Shield size={18} />} />
-                    <SidebarSubItem href="/dashboard/projects" label="Projects" icon={<Folder size={18} />} />
+                    {/* User Management */}
+                    <SidebarSubItem href="/dashboard/users" label="User List" icon={<List size={16} />} />
+                    <SidebarSubItem href="/dashboard/users/add" label="Add New User" icon={<UserPlus size={16} />} />
+                    <SidebarSubItem href="/dashboard/roles" label="Roles Management" icon={<Shield size={16} />} />
+                    <SidebarSubItem href="/dashboard/projects" label="Projects" icon={<Folder size={16} />} />
                 </SidebarGroup>
 
                 {/* Settings Group */}
@@ -92,8 +94,8 @@ export default function DashboardSidebar() {
                 >
                     <SidebarSubItem href="/dashboard/room/add" label="Add New Room" icon={<BedDouble size={16} />} />
                     <SidebarSubItem href="/dashboard/room/list" label="Hotel Room List" icon={<List size={16} />} />
-                    <SidebarSubItem href="/dashboard/room/payment" label="Hotel Room Payment" icon={<List size={16} />} />
-                    <SidebarSubItem href="/dashboard/room/booking" label="Hotel Room Booking" icon={<List size={16} />} />
+                    <SidebarSubItem href="/dashboard/room/payment" label="Hotel Room Payment" icon={<CreditCard size={16} />} />
+                    <SidebarSubItem href="/dashboard/room/booking" label="Hotel Room Booking" icon={<CalendarCheck size={16} />} />
                 </SidebarGroup>
 
                 {/* Bus Tickets Management Group */}
@@ -107,12 +109,12 @@ export default function DashboardSidebar() {
                     <SidebarSubItem href="/dashboard/bus/layout-list" label="Bus Layout List" icon={<List size={16} />} />
                     <SidebarSubItem href="/dashboard/agency/add" label="Add New Agency" icon={<BedDouble size={16} />} />
                     <SidebarSubItem href="/dashboard/agency/list" label="Agency List" icon={<List size={16} />} />
-                    <SidebarSubItem href="/dashboard/bus/add" label="Add new bus" icon={<CalendarCheck size={16} />} />
-                    <SidebarSubItem href="/dashboard/bus/list" label="Bus list" icon={<CreditCard size={16} />} />
+                    <SidebarSubItem href="/dashboard/bus/add" label="Add new bus" icon={<Bus size={16} />} />
+                    <SidebarSubItem href="/dashboard/bus/list" label="Bus list" icon={<List size={16} />} />
                     <SidebarSubItem href="/dashboard/bus/booking" label="Bus Booking" icon={<CalendarCheck size={16} />} />
                     <SidebarSubItem href="/dashboard/bus/payment" label="View payments" icon={<CreditCard size={16} />} />
-                    <SidebarSubItem href="/dashboard/Journey/Add" label="Add new Journey " icon={<CreditCard size={16} />} />
-                    <SidebarSubItem href="/dashboard/Journey/list" label="Journey list" icon={<CreditCard size={16} />} />
+                    <SidebarSubItem href="/dashboard/Journey/Add" label="Add new Journey " icon={<CalendarCheck size={16} />} />
+                    <SidebarSubItem href="/dashboard/Journey/list" label="Journey list" icon={<List size={16} />} />
                 </SidebarGroup>
 
                 {/* Retreat Management Group */}

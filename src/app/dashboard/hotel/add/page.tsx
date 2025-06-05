@@ -29,9 +29,9 @@ export default function HotelForm() {
 
   const [photos, setPhotos] = useState<File[]>([]);
   const [authToken, setAuthToken] = useState<string>("");
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
-    // Retrieve authToken from localStorage or other secure storage
     const token = localStorage.getItem("authToken");
     if (token) {
       setAuthToken(token);
@@ -48,19 +48,16 @@ export default function HotelForm() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value, type } = e.target;
 
-    if (name === "lat" || name === "lng") {
+    if (name === "stars") {
       setFormData((prev) => ({
         ...prev,
-        coordinate: { ...prev.coordinate, [name]: value },
-      }));
-    } else if (type === "number") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: parseInt(value) || 1,
+        [name]: parseInt(value),
       }));
     } else {
       setFormData((prev) => ({
@@ -70,7 +67,10 @@ export default function HotelForm() {
     }
   };
 
-  const handlePhotoChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (e.target.files && e.target.files[0]) {
       const newPhotos = [...photos];
       newPhotos[index] = e.target.files[0];
@@ -90,6 +90,7 @@ export default function HotelForm() {
         ...prev,
         coordinate: { lat, lng },
       }));
+      setShowMap(false); // close the modal after selecting
     }
   };
 
@@ -158,122 +159,121 @@ export default function HotelForm() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-900">Hotel Name</label>
+          <label className="block text-sm font-medium text-gray-900">
+            Hotel Name
+          </label>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="contrast-input w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900">Address</label>
+          <label className="block text-sm font-medium text-gray-900">
+            Address
+          </label>
           <input
             type="text"
             name="address"
             value={formData.address}
             onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-900">Latitude</label>
-          <input
-            type="text"
-            name="lat"
-            value={formData.coordinate.lat}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-900">Longitude</label>
-          <input
-            type="text"
-            name="lng"
-            value={formData.coordinate.lng}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="contrast-input w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-sm font-medium text-gray-900">Description</label>
+          <label className="block text-sm font-medium text-gray-900">
+            Description
+          </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             rows={3}
             required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="contrast-input w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900">Stars</label>
-          <input
-            type="number"
+          <label className="block text-sm font-medium text-gray-900">
+            Stars
+          </label>
+          <select
             name="stars"
             value={formData.stars}
             onChange={handleChange}
-            min={1}
-            max={5}
             required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
+            className="contrast-input w-full p-2 border border-gray-300 rounded"
+          >
+            <option value={1}>1 Star</option>
+            <option value={2}>2 Stars</option>
+            <option value={3}>3 Stars</option>
+            <option value={4}>4 Stars</option>
+            <option value={5}>5 Stars</option>
+          </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900">Working Time</label>
+          <label className="block text-sm font-medium text-gray-900">
+            Working Time
+          </label>
           <input
             type="text"
             name="working_time"
             value={formData.working_time}
             onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="contrast-input w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-900">Status</label>
+          <label className="block text-sm font-medium text-gray-900">
+            Status
+          </label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="contrast-input w-full p-2 border border-gray-300 rounded"
           >
             <option value="">Select Status</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
         </div>
+
+        <div className="md:col-span-2 flex flex-col">
+          <label className="block text-sm font-medium text-gray-900 mb-2">
+            Location
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowMap(true)}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
+            Select Location on Map
+          </button>
+          {formData.coordinate.lat && formData.coordinate.lng && (
+            <p className="mt-2 text-sm text-gray-700">
+              Selected Coordinates: ({formData.coordinate.lat},{" "}
+              {formData.coordinate.lng})
+            </p>
+          )}
+        </div>
       </div>
 
-      {isLoaded && (
-        <div className="h-64 mt-4">
-          <GoogleMap
-            center={center}
-            zoom={15}
-            mapContainerClassName="w-full h-full rounded"
-            onClick={handleMapClick}
-          >
-            <Marker position={center} />
-          </GoogleMap>
-        </div>
-      )}
-
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">Photos</label>
+        <label className="block text-sm font-medium text-gray-900 mb-2">
+          Photos
+        </label>
         <div className="space-y-2">
           {photos.map((_, index) => (
             <input
@@ -302,6 +302,41 @@ export default function HotelForm() {
           Submit Hotel
         </button>
       </div>
+
+      {showMap && isLoaded && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-4 rounded shadow-md w-full max-w-2xl h-[500px] relative">
+            <button
+              className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+              onClick={() => setShowMap(false)}
+            >
+              Close
+            </button>
+            <GoogleMap
+              center={center}
+              zoom={15}
+              mapContainerClassName="w-full h-full rounded"
+              onClick={handleMapClick}
+            >
+              {formData.coordinate.lat && formData.coordinate.lng && (
+                <Marker
+                  position={{
+                    lat: parseFloat(formData.coordinate.lat),
+                    lng: parseFloat(formData.coordinate.lng),
+                  }}
+                />
+              )}
+            </GoogleMap>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        .contrast-input {
+          color: #000 !important;
+          border-color: #333 !important;
+        }
+      `}</style>
     </form>
   );
 }

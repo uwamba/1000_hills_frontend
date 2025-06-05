@@ -165,7 +165,7 @@ export default function AddRetreatPage() {
       >
         {/* Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Title</label>
+          <label className="block text-sm font-medium text-gray-700">Event and Meeting Space</label>
           <input
             name="title"
             value={formData.title}
