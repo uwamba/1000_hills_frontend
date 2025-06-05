@@ -52,7 +52,6 @@ export default function RoomForm() {
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
 
-  // Get authToken from localStorage
   const authToken =
     typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
 
@@ -196,67 +195,109 @@ export default function RoomForm() {
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Add New Room</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[
-          { name: "name", label: "Room Name", type: "text" },
-          { name: "type", label: "Room Type", type: "text" },
-          { name: "bed_size", label: "Bed Size", type: "text" },
-          { name: "price", label: "Price", type: "number" },
-          { name: "currency", label: "Currency", type: "text" },
-          { name: "number_of_people", label: "Number of People", type: "number" },
-        ].map(({ name, label, type }) => (
-          <div key={name}>
-            <label className="block text-sm font-medium text-gray-800">
-              {label}
-            </label>
-            <input
-              type={type}
-              name={name}
-              value={formData[name as keyof FormDataType] as string | number}
-              onChange={handleChange}
-              className="w-full p-2 mt-1 border border-gray-400 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-        ))}
+        {/* Room Name */}
+        <div>
+          <label className="block text-sm font-medium text-gray-800">
+            Room Name
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full p-2 mt-1 border border-gray-400 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
-        {[
-          { name: "has_wireless", label: "Has Wireless" },
-          { name: "has_bathroom", label: "Has Bathroom" },
-          { name: "has_ac", label: "Has AC" },
-        ].map(({ name, label }) => (
-          <div key={name} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              name={name}
-              checked={formData[name as keyof FormDataType] as boolean}
-              onChange={handleChange}
-              className="text-blue-600 focus:ring-blue-500"
-            />
-            <label className="text-sm font-medium text-gray-800">{label}</label>
-          </div>
-        ))}
+        {/* Room Type */}
+        <div>
+          <label className="block text-sm font-medium text-gray-800">
+            Room Type
+          </label>
+          <select
+            name="type"
+            value={formData.type}
+            onChange={handleChange}
+            className="w-full p-2 mt-1 border border-gray-400 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Select Room Type</option>
+            <option value="Single Room">Single Room</option>
+            <option value="Double">Double</option>
+            <option value="Twin Room">Twin Room</option>
+            <option value="Triple Room">Triple Room</option>
+            <option value="King Room">King Room</option>
+            <option value="Suite">Suite</option>
+            <option value="Executive Room">Executive Room</option>
+            <option value="Presidential Suite">Presidential Suite</option>
+          </select>
+        </div>
 
-        {[
-          { name: "has_swimming_pool", label: "Swimming Pool" },
-          { name: "has_laundry", label: "Laundry Service" },
-          { name: "has_gym", label: "Gym" },
-          { name: "has_room_service", label: "Room Service" },
-          { name: "has_sauna_massage", label: "Sauna & Massage" },
-          { name: "has_kitchen", label: "Kitchen" },
-          { name: "has_fridge", label: "Fridge" },
-        ].map(({ name, label }) => (
-          <div key={name} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              name={name}
-              checked={formData[name as keyof FormDataType] as boolean}
-              onChange={handleChange}
-              className="text-blue-600 focus:ring-blue-500"
-            />
-            <label className="text-sm font-medium text-gray-800">{label}</label>
-          </div>
-        ))}
+        {/* Bed Size */}
+        <div>
+          <label className="block text-sm font-medium text-gray-800">
+            Bed Size
+          </label>
+          <input
+            type="text"
+            name="bed_size"
+            value={formData.bed_size}
+            onChange={handleChange}
+            className="w-full p-2 mt-1 border border-gray-400 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
 
+        {/* Price */}
+        <div>
+          <label className="block text-sm font-medium text-gray-800">
+            Price
+          </label>
+          <input
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            className="w-full p-2 mt-1 border border-gray-400 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        {/* Currency */}
+        <div>
+          <label className="block text-sm font-medium text-gray-800">
+            Currency
+          </label>
+          <select
+            name="currency"
+            value={formData.currency}
+            onChange={handleChange}
+            className="w-full p-2 mt-1 border border-gray-400 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Select Currency</option>
+            <option value="FRW">FRW</option>
+            <option value="USD">USD</option>
+          </select>
+        </div>
+
+        {/* Number of People */}
+        <div>
+          <label className="block text-sm font-medium text-gray-800">
+            Number of People
+          </label>
+          <input
+            type="number"
+            name="number_of_people"
+            value={formData.number_of_people}
+            onChange={handleChange}
+            className="w-full p-2 mt-1 border border-gray-400 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        {/* Hotel */}
         <div>
           <label className="block text-sm font-medium text-gray-800">
             Hotel
@@ -277,6 +318,7 @@ export default function RoomForm() {
           </select>
         </div>
 
+        {/* Status */}
         <div>
           <label className="block text-sm font-medium text-gray-800">
             Status
@@ -293,8 +335,34 @@ export default function RoomForm() {
             <option value="inactive">Inactive</option>
           </select>
         </div>
+
+        {/* Checkboxes */}
+        {[
+          { name: "has_wireless", label: "Has Wireless" },
+          { name: "has_bathroom", label: "Has Bathroom" },
+          { name: "has_ac", label: "Has AC" },
+          { name: "has_swimming_pool", label: "Swimming Pool" },
+          { name: "has_laundry", label: "Laundry Service" },
+          { name: "has_gym", label: "Gym" },
+          { name: "has_room_service", label: "Room Service" },
+          { name: "has_sauna_massage", label: "Sauna & Massage" },
+          { name: "has_kitchen", label: "Kitchen" },
+          { name: "has_fridge", label: "Fridge" },
+        ].map(({ name, label }) => (
+          <div key={name} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name={name}
+              checked={formData[name as keyof FormDataType] as boolean}
+              onChange={handleChange}
+              className="text-blue-600 focus:ring-blue-500"
+            />
+            <label className="text-sm font-medium text-gray-800">{label}</label>
+          </div>
+        ))}
       </div>
 
+      {/* Photos */}
       <div className="mt-4">
         <label className="block text-sm font-medium text-gray-800 mb-2">
           Photos
@@ -319,6 +387,7 @@ export default function RoomForm() {
         </button>
       </div>
 
+      {/* Submit */}
       <div className="mt-6">
         <button
           type="submit"

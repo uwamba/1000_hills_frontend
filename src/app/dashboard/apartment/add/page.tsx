@@ -26,6 +26,7 @@ const defaultApartmentData = {
 export default function ApartmentFormPage() {
   const [formData, setFormData] = useState(defaultApartmentData);
   const [photos, setPhotos] = useState<File[]>([]);
+  const [isMapOpen, setIsMapOpen] = useState(false);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
@@ -41,12 +42,7 @@ export default function ApartmentFormPage() {
   ) => {
     const { name, value, type } = e.target;
 
-    if (name === "lat" || name === "lng") {
-      setFormData((prev) => ({
-        ...prev,
-        coordinate: { ...prev.coordinate, [name]: value },
-      }));
-    } else if (type === "checkbox") {
+    if (type === "checkbox") {
       const target = e.target as HTMLInputElement;
       setFormData((prev) => ({
         ...prev,
@@ -118,7 +114,6 @@ export default function ApartmentFormPage() {
 
     try {
       const authToken = localStorage.getItem("authToken");
-
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments`,
         {
@@ -161,7 +156,7 @@ export default function ApartmentFormPage() {
             value={formData.name}
             onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded text-gray-900"
           />
         </div>
 
@@ -173,31 +168,7 @@ export default function ApartmentFormPage() {
             value={formData.address}
             onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-900">Latitude</label>
-          <input
-            type="text"
-            name="lat"
-            value={formData.coordinate.lat}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-900">Longitude</label>
-          <input
-            type="text"
-            name="lng"
-            value={formData.coordinate.lng}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded text-gray-900"
           />
         </div>
 
@@ -208,8 +179,7 @@ export default function ApartmentFormPage() {
             name="price_per_night"
             value={formData.price_per_night}
             onChange={handleChange}
-            placeholder="Enter price per night"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded text-gray-900"
           />
         </div>
 
@@ -220,8 +190,7 @@ export default function ApartmentFormPage() {
             name="monthly_price"
             value={formData.monthly_price}
             onChange={handleChange}
-            placeholder="Enter monthly price"
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded text-gray-900"
           />
         </div>
 
@@ -233,7 +202,7 @@ export default function ApartmentFormPage() {
             onChange={handleChange}
             rows={3}
             required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded text-gray-900"
           />
         </div>
 
@@ -246,7 +215,7 @@ export default function ApartmentFormPage() {
             onChange={handleChange}
             min={1}
             required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded text-gray-900"
           />
         </div>
 
@@ -259,7 +228,7 @@ export default function ApartmentFormPage() {
             onChange={handleChange}
             min={1}
             required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded text-gray-900"
           />
         </div>
 
@@ -290,7 +259,7 @@ export default function ApartmentFormPage() {
             name="annexes"
             value={formData.annexes}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded text-gray-900"
           />
         </div>
 
@@ -301,7 +270,7 @@ export default function ApartmentFormPage() {
             value={formData.status}
             onChange={handleChange}
             required
-            className="w-full p-2 border border-gray-300 rounded"
+            className="w-full p-2 border border-gray-300 rounded text-gray-900"
           >
             <option value="">Select Status</option>
             <option value="active">Active</option>
@@ -332,19 +301,7 @@ export default function ApartmentFormPage() {
         </div>
       </div>
 
-      {isLoaded && (
-        <div className="h-64 mt-4">
-          <GoogleMap
-            center={center}
-            zoom={15}
-            mapContainerClassName="w-full h-full rounded"
-            onClick={handleMapClick}
-          >
-            <Marker position={center} />
-          </GoogleMap>
-        </div>
-      )}
-
+      {/* Photos */}
       <div>
         <label className="block text-sm font-medium text-gray-900 mb-2">Photos</label>
         <div className="space-y-2">
@@ -354,7 +311,7 @@ export default function ApartmentFormPage() {
               type="file"
               accept="image/*"
               onChange={(e) => handlePhotoChange(index, e)}
-              className="block w-full text-sm border border-gray-300 rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="block w-full text-sm border border-gray-300 rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 text-gray-900"
             />
           ))}
         </div>
@@ -367,10 +324,33 @@ export default function ApartmentFormPage() {
         </button>
       </div>
 
+      <div className="md:col-span-2">
+        <button
+          type="button"
+          onClick={() => setIsMapOpen(!isMapOpen)}
+          className="mt-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded hover:bg-green-700"
+        >
+          {isMapOpen ? "Close Map" : "Set Location on Map"}
+        </button>
+      </div>
+
+      {isLoaded && isMapOpen && (
+        <div className="h-64 mt-4 border rounded overflow-hidden">
+          <GoogleMap
+            center={center}
+            zoom={15}
+            mapContainerClassName="w-full h-full"
+            onClick={handleMapClick}
+          >
+            <Marker position={center} />
+          </GoogleMap>
+        </div>
+      )}
+
       <div>
         <button
           type="submit"
-          className="w-full py-3 text-white bg-blue-700 rounded hover:bg-blue-800"
+          className="w-full py-3 px-4 text-center font-medium bg-blue-600 hover:bg-blue-700 text-white rounded"
         >
           Submit Apartment
         </button>
