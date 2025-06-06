@@ -63,7 +63,7 @@ export default function RoomDetailComponent() {
     if (roomId) {
       const fetchRoom = async () => {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/rooms/${roomId}`);
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/rooms/${roomId}`);
           if (!res.ok) throw new Error('Failed to fetch room details');
           const data = await res.json();
           setRoom(data.room);

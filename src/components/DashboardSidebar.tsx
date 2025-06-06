@@ -44,7 +44,7 @@ export default function DashboardSidebar() {
                     toggle={() => setOpenManagement(!openManagement)}
                 >
                     {/* User Management */}
-                    <SidebarSubItem href="/dashboard/users" label="User List" icon={<List size={16} />} />
+                    <SidebarSubItem href="/dashboard/users/list" label="User List" icon={<List size={16} />} />
                     <SidebarSubItem href="/dashboard/users/add" label="Add New User" icon={<UserPlus size={16} />} />
                     <SidebarSubItem href="/dashboard/roles" label="Roles Management" icon={<Shield size={16} />} />
                     <SidebarSubItem href="/dashboard/projects" label="Projects" icon={<Folder size={16} />} />
