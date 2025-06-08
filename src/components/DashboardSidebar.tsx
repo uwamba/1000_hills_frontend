@@ -16,6 +16,8 @@ import {
   CalendarCheck,
   CreditCard,
   Bus,
+  DollarSign,
+  Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,6 +30,9 @@ export default function DashboardSidebar() {
   const [openApartments, setOpenApartments] = useState(false);
   const [openRoom, setOpenRoom] = useState(false);
   const [openRetreat, setOpenRetreat] = useState(false);
+
+  const [openBooking, setOpenBooking] = useState(false);
+  const [openPayment, setOpenPayment] = useState(false);
 
   return (
     <aside className="w-64 h-screen overflow-y-auto bg-gray-900 text-white p-4 space-y-6">
@@ -129,6 +134,28 @@ export default function DashboardSidebar() {
           <SidebarSubItem href="/dashboard/bus/payment" label="View payments" icon={<CreditCard size={16} />} />
           <SidebarSubItem href="/dashboard/Journey/Add" label="Add new Journey " icon={<CalendarCheck size={16} />} />
           <SidebarSubItem href="/dashboard/Journey/list" label="Journey list" icon={<List size={16} />} />
+        </SidebarGroup>
+
+        <SidebarGroup
+          label="Booking Management"
+          icon={<Folder size={20} />}
+          open={openBooking}
+          toggle={() => setOpenBooking(!openBooking)}
+        >
+          <SidebarSubItem href="/dashboard/booking/rooms" label="Rooms Booking" icon={<Calendar size={16} />} />
+          <SidebarSubItem href="/dashboard/booking/apartments" label="Apartments Booking" icon={<Calendar size={16} />} />
+          <SidebarSubItem href="/dashboard/booking/ticket" label="Bus Tickets Booking" icon={<Calendar size={16} />} />
+          <SidebarSubItem href="/dashboard/booking/events" label="Events Booking" icon={<Calendar size={16} />} />
+
+        </SidebarGroup>
+        <SidebarGroup
+          label="Payments Management"
+          icon={<Folder size={20} />}
+          open={openPayment}
+          toggle={() => setOpenPayment(!openPayment)}
+        >
+          <SidebarSubItem href="/dashboard/payments" label="Payments" icon={<DollarSign size={16} />} />
+
         </SidebarGroup>
       </nav>
     </aside>
