@@ -110,7 +110,7 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
       });
       if (!res.ok) throw new Error("Invalid OTP");
 
-      const bookingRes = await fetch(`${apiUrl}/bookings`, {
+      const bookingRes = await fetch(`${apiUrl}/booking/ticket`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

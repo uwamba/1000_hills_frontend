@@ -20,9 +20,11 @@ interface Apartment {
   status: string | null;
   deleted_on: string | null;
   photos: Photo[];
-  price?: number;
+  price_per_night?: number;
+  price_per_month?: number;
   currency?: string;
 }
+
 
 interface ApartmentResponse {
   current_page: number;
@@ -52,6 +54,16 @@ export default function ApartmentList() {
     extra_note: '',
   });
 
+  const [filters, setFilters] = useState({
+    price_type: 'night',
+    min_price: '',
+    max_price: '',
+    from_date: '',
+    to_date: '',
+  });
+
+
+
   const [step, setStep] = useState<'form' | 'payment' | 'otp' | 'success'>('form');
   const [otp, setOtp] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -59,11 +71,26 @@ export default function ApartmentList() {
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
-  const fetchApartments = async (page: number) => {
+  const fetchApartments = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/apartments?page=${page}`);
+      const params = new URLSearchParams();
+
+      params.append('page', String(page));
+
+      // Append each filter only if it has a value
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== '') {
+          params.append(key, value);
+        }
+      });
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/client/apartments?${params.toString()}`
+      );
+
       if (!res.ok) throw new Error('Failed to fetch apartments');
+
       const json: ApartmentResponse = await res.json();
       setApartments(json.data);
       setPage(json.current_page);
@@ -74,13 +101,16 @@ export default function ApartmentList() {
       setLoading(false);
     }
   };
-
   useEffect(() => {
-    fetchApartments(page);
-  }, [page]);
+    fetchApartments(1); // Reset to page 1 on filter change
+  }, [filters]);
 
-  const handlePrev = () => page > 1 && setPage(page - 1);
-  const handleNext = () => page < lastPage && setPage(page + 1);
+
+
+
+  const handlePrev = () => page > 1 && fetchApartments(page - 1);
+  const handleNext = () => page < lastPage && fetchApartments(page + 1);
+
 
   const openDetailModal = (apartment: Apartment) => {
     setSelectedApartment(apartment);
@@ -144,6 +174,47 @@ export default function ApartmentList() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <select
+          value={filters.price_type}
+          onChange={(e) => setFilters({ ...filters, price_type: e.target.value })}
+          className="p-2 border rounded text-black"
+        >
+          <option value="night">Price per Night</option>
+          <option value="month">Price per Month</option>
+        </select>
+
+        <input
+          type="number"
+          placeholder="Min Price"
+          value={filters.min_price}
+          onChange={(e) => setFilters({ ...filters, min_price: e.target.value })}
+          className="p-2 border rounded text-black"
+        />
+
+        <input
+          type="number"
+          placeholder="Max Price"
+          value={filters.max_price}
+          onChange={(e) => setFilters({ ...filters, max_price: e.target.value })}
+          className="p-2 border rounded text-black"
+        />
+
+        <input
+          type="date"
+          value={filters.from_date}
+          onChange={(e) => setFilters({ ...filters, from_date: e.target.value })}
+          className="p-2 border rounded text-black"
+        />
+
+        <input
+          type="date"
+          value={filters.to_date}
+          onChange={(e) => setFilters({ ...filters, to_date: e.target.value })}
+          className="p-2 border rounded text-black"
+        />
+      </div>
+
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6">Apartment List</h1>
 
       {loading ? (
@@ -154,10 +225,7 @@ export default function ApartmentList() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {apartments.map((apartment) => (
-              <div
-                key={apartment.id}
-                className="bg-white rounded-lg shadow-lg p-4 border hover:shadow-2xl transform transition-transform hover:scale-105"
-              >
+              <div key={apartment.id} className="bg-white rounded-lg shadow-lg p-4 border hover:shadow-2xl transform transition-transform hover:scale-105">
                 <div className="w-full h-48 mb-4 overflow-hidden rounded-lg">
                   <img
                     src={
@@ -173,6 +241,12 @@ export default function ApartmentList() {
                 <p className="text-md text-gray-500">{apartment.address}</p>
                 <p className="text-gray-700 mt-2">Bedrooms: {apartment.number_of_bedroom}</p>
                 <p className="text-gray-700">Floors: {apartment.number_of_floor}</p>
+                <p className="text-sm text-gray-600">
+                  <strong>Price/night:</strong> {apartment.price_per_night ? `$${apartment.price_per_night}` : 'N/A'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Price/month:</strong> {apartment.price_per_month ? `$${apartment.price_per_month}` : 'N/A'}
+                </p>
 
                 <div className="mt-4 space-y-2">
                   <button
@@ -190,6 +264,7 @@ export default function ApartmentList() {
                   </button>
                 </div>
               </div>
+
             ))}
           </div>
 
@@ -235,9 +310,8 @@ export default function ApartmentList() {
                       key={photo.id}
                       src={`${imageBaseUrl}/${photo.url}`}
                       alt={`Apartment photo ${index + 1}`}
-                      className={`w-24 h-24 object-cover rounded cursor-pointer ${
-                        selectedPhotoIndex === index ? 'border-2 border-indigo-500' : ''
-                      }`}
+                      className={`w-24 h-24 object-cover rounded cursor-pointer ${selectedPhotoIndex === index ? 'border-2 border-indigo-500' : ''
+                        }`}
                       onClick={() => setSelectedPhotoIndex(index)}
                     />
                   ))}
