@@ -12,6 +12,10 @@ interface Photo {
 export interface Retreat {
   id: number;
   title: string;
+  price_per_person: number;
+  package_price: number;
+  capacity: number;
+  pricing_type: string;
   description: string;
   address: string;
   status: string | null;
@@ -34,14 +38,34 @@ export default function RetreatList() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [filters, setFilters] = useState({
+  min_price_per_person: '',
+  max_price_per_person: '',
+  min_package_price: '',
+  max_package_price: '',
+  min_capacity: '',
+  max_capacity: '',
+  pricing_type: '',
+  from_date: '',
+  to_date: '',
+});
 
-  const fetchRetreats = async (page: number) => {
+  const fetchRetreats = async (page: number, filtersOverride = filters) => {
     try {
       setLoading(true);
+
+      const params = new URLSearchParams({
+        page: String(page),
+        ...Object.fromEntries(
+          Object.entries(filtersOverride).filter(([, value]) => value !== '')
+        ),
+      });
+
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/client/retreats?page=${page}`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/client/retreats?${params}`
       );
       if (!res.ok) throw new Error('Failed to fetch retreats');
+
       const json: RetreatResponse = await res.json();
 
       setRetreats((prev) => (page === 1 ? json.data : [...prev, ...json.data]));
@@ -55,8 +79,31 @@ export default function RetreatList() {
   };
 
   useEffect(() => {
-    fetchRetreats(page);
-  }, [page]);
+    fetchRetreats(1); // On mount
+  }, []);
+
+  const handleSearch = () => {
+    fetchRetreats(1);
+  };
+
+  const handleClear = () => {
+    const cleared = {
+      price_per_person: '',
+      package_price: '',
+      capacity: '',
+      pricing_type: '',
+      from_date: '',
+      to_date: '',
+      min_price_per_person: '',
+      max_price_per_person: '',
+      min_package_price: '',
+      max_package_price: '',
+      min_capacity: '',
+      max_capacity: '',
+    };
+    setFilters(cleared);
+    fetchRetreats(1, cleared);
+  };
 
   const imageBaseUrl =
     process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
@@ -87,6 +134,106 @@ export default function RetreatList() {
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6">Retreat List</h1>
 
+      {/* Filters */}
+      <div className="mb-6 bg-white p-6 rounded-lg shadow-md grid md:grid-cols-3 gap-4 border border-gray-200">
+  {/* Price per Person Range */}
+  <div className="flex gap-2">
+    <input
+      type="number"
+      placeholder="Min Price/Person"
+      value={filters.min_price_per_person}
+      onChange={(e) => setFilters({ ...filters, min_price_per_person: e.target.value })}
+      className="w-1/2 border border-gray-300 p-3 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    />
+    <input
+      type="number"
+      placeholder="Max Price/Person"
+      value={filters.max_price_per_person}
+      onChange={(e) => setFilters({ ...filters, max_price_per_person: e.target.value })}
+      className="w-1/2 border border-gray-300 p-3 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    />
+  </div>
+
+  {/* Package Price Range */}
+  <div className="flex gap-2">
+    <input
+      type="number"
+      placeholder="Min Package Price"
+      value={filters.min_package_price}
+      onChange={(e) => setFilters({ ...filters, min_package_price: e.target.value })}
+      className="w-1/2 border border-gray-300 p-3 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    />
+    <input
+      type="number"
+      placeholder="Max Package Price"
+      value={filters.max_package_price}
+      onChange={(e) => setFilters({ ...filters, max_package_price: e.target.value })}
+      className="w-1/2 border border-gray-300 p-3 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    />
+  </div>
+
+  {/* Capacity Range */}
+  <div className="flex gap-2">
+    <input
+      type="number"
+      placeholder="Min Capacity"
+      value={filters.min_capacity}
+      onChange={(e) => setFilters({ ...filters, min_capacity: e.target.value })}
+      className="w-1/2 border border-gray-300 p-3 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    />
+    <input
+      type="number"
+      placeholder="Max Capacity"
+      value={filters.max_capacity}
+      onChange={(e) => setFilters({ ...filters, max_capacity: e.target.value })}
+      className="w-1/2 border border-gray-300 p-3 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    />
+  </div>
+
+  {/* Pricing Type */}
+  <select
+    value={filters.pricing_type}
+    onChange={(e) => setFilters({ ...filters, pricing_type: e.target.value })}
+    className="border border-gray-300 p-3 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  >
+    <option value="">Pricing Type</option>
+    <option value="package">Package</option>
+    <option value="per_person">Per Person</option>
+  </select>
+
+  {/* Date Filters */}
+  <input
+    type="date"
+    value={filters.from_date}
+    onChange={(e) => setFilters({ ...filters, from_date: e.target.value })}
+    className="border border-gray-300 p-3 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  />
+  <input
+    type="date"
+    value={filters.to_date}
+    onChange={(e) => setFilters({ ...filters, to_date: e.target.value })}
+    className="border border-gray-300 p-3 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  />
+
+  {/* Buttons */}
+  <div className="col-span-3 flex justify-end gap-3 mt-2">
+    <button
+      onClick={handleSearch}
+      className="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+    >
+      Search
+    </button>
+    <button
+      onClick={handleClear}
+      className="px-5 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+    >
+      Clear
+    </button>
+  </div>
+</div>
+
+
+      {/* Retreat Cards */}
       {loading && page === 1 ? (
         <div className="text-center text-lg text-gray-600">Loading retreats...</div>
       ) : retreats.length === 0 ? (
@@ -112,6 +259,9 @@ export default function RetreatList() {
                 </div>
                 <h2 className="text-xl font-semibold text-indigo-600">{retreat.title}</h2>
                 <p className="text-md text-gray-500">{retreat.address}</p>
+                <p className="text-gray-600 mt-1">Price: ${retreat.capacity}</p>
+                <p className="text-gray-600 mt-1">Price/Person: {retreat.price_per_person} people</p>
+                 <p className="text-gray-600 mt-1">Package Price: {retreat.package_price} people</p>
                 <div className="mt-4 space-y-2">
                   <button
                     onClick={() => openDetailModal(retreat)}
@@ -133,7 +283,7 @@ export default function RetreatList() {
           {page < lastPage && (
             <div className="mt-8 flex justify-center">
               <button
-                onClick={() => setPage(page + 1)}
+                onClick={() => fetchRetreats(page + 1)}
                 className="px-6 py-3 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50"
                 disabled={loading}
               >
@@ -144,7 +294,7 @@ export default function RetreatList() {
         </>
       )}
 
-      {/* Retreat Detail Modal */}
+      {/* Detail & Booking modals */}
       <Dialog open={isDetailModalOpen} onClose={closeDetailModal} className="relative z-50">
         <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4 overflow-auto">
@@ -163,11 +313,15 @@ export default function RetreatList() {
 
             <p className="text-gray-600 mb-4">{selectedRetreat?.address}</p>
 
-            {Array.isArray(selectedRetreat?.photos) && selectedRetreat.photos.length > 0 && (
+            {selectedRetreat?.photos?.length ? (
               <div className="mb-6">
                 <div className="w-full h-96 mb-4 rounded overflow-hidden border">
                   <img
-                    src={`${imageBaseUrl}/${selectedRetreat.photos[selectedPhotoIndex].path}`}
+                    src={
+                      selectedRetreat.photos?.[selectedPhotoIndex]
+                        ? `${imageBaseUrl}/${selectedRetreat.photos[selectedPhotoIndex].path}`
+                        : '/placeholder.jpg'
+                    }
                     alt="Main"
                     className="w-full h-full object-cover"
                   />
@@ -178,46 +332,17 @@ export default function RetreatList() {
                       key={photo.id}
                       src={`${imageBaseUrl}/${photo.path}`}
                       onClick={() => setSelectedPhotoIndex(index)}
-                      className={`w-24 h-24 object-cover rounded cursor-pointer border-2 ${
-                        index === selectedPhotoIndex
+                      className={`w-24 h-24 object-cover rounded cursor-pointer border-2 ${index === selectedPhotoIndex
                           ? 'border-indigo-500'
                           : 'border-gray-200 hover:border-gray-400'
-                      }`}
+                        }`}
                       alt={`Thumbnail ${index + 1}`}
                     />
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 text-base">
-              <p>
-                <strong>Title:</strong> {selectedRetreat?.title}
-              </p>
-              <p>
-                <strong>Address:</strong> {selectedRetreat?.address}
-              </p>
-              <p>
-                <strong>Description:</strong> {selectedRetreat?.description}
-              </p>
-              <p>
-                <strong>Status:</strong>{' '}
-                <span
-                  className={
-                    selectedRetreat?.status === 'active'
-                      ? 'text-green-600'
-                      : 'text-red-600'
-                  }
-                >
-                  {selectedRetreat?.status || 'N/A'}
-                </span>
-              </p>
-              {selectedRetreat?.deleted_on && (
-                <p>
-                  <strong>Deleted On:</strong> {selectedRetreat.deleted_on}
-                </p>
-              )}
-            </div>
 
             {selectedRetreat && (
               <div className="mt-6">
@@ -233,7 +358,6 @@ export default function RetreatList() {
         </div>
       </Dialog>
 
-      {/* Booking Retreat Modal */}
       {selectedRetreat && (
         <BookingRetreat
           isOpen={isBookingOpen}
