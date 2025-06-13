@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
@@ -58,17 +58,93 @@ interface HotelResponse {
   data: Hotel[];
 }
 
+type PhotoItem = {
+  type: "apartment" | "hotel" | "retreat";
+  title: string;
+  description?: string;
+  location?: string;
+  address?: string;
+  photo: Photo;
+};
+
 export default function Home() {
   const suggestions = [
     { text: "Hotel Rooms", link: "/roomList" },
     { text: "Apartment booking", link: "/apartmentsListing" },
-    { text: "Bus ticketing", link: "/busListing" }
+    { text: "Bus ticketing", link: "/busListing" },
   ];
 
   const [query, setQuery] = useState("");
-  const [filtered, setFiltered] = useState<{ text: string, link: string }[]>([]);
+  const [filtered, setFiltered] = useState<{ text: string; link: string }[]>([]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [apartments, setApartments] = useState<Apartment[]>([]);
+  const [retreats, setRetreats] = useState<Retreat[]>([]);
+  const [hotels, setHotels] = useState<Hotel[]>([]);
+
+  const [loadingApartments, setLoadingApartments] = useState(true);
+  const [loadingRetreats, setLoadingRetreats] = useState(true);
+  const [loadingHotels, setLoadingHotels] = useState(true);
+
+  const [selectedPhotoItem, setSelectedPhotoItem] = useState<PhotoItem | null>(null);
+
+  const imageBaseUrl =
+    process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || "http://localhost:3000/images";
+
+  const fetchApartments = async () => {
+    try {
+      setLoadingApartments(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/client/apartments?page=1`
+      );
+      if (!res.ok) throw new Error("Failed to fetch apartments");
+      const json: ApartmentResponse = await res.json();
+      setApartments(json.data);
+    } catch (error) {
+      console.error("Error fetching apartments:", error);
+    } finally {
+      setLoadingApartments(false);
+    }
+  };
+
+  const fetchRetreats = async () => {
+    try {
+      setLoadingRetreats(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/client/retreats?page=1`
+      );
+      if (!res.ok) throw new Error("Failed to fetch retreats");
+      const json: RetreatResponse = await res.json();
+      setRetreats(json.data);
+    } catch (error) {
+      console.error("Error fetching retreats:", error);
+    } finally {
+      setLoadingRetreats(false);
+    }
+  };
+
+  const fetchRooms = async () => {
+    try {
+      setLoadingHotels(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/client/rooms?page=1`
+      );
+      if (!res.ok) throw new Error("Failed to fetch hotels");
+      const json: HotelResponse = await res.json();
+      setHotels(json.data);
+    } catch (error) {
+      console.error("Error fetching hotels:", error);
+    } finally {
+      setLoadingHotels(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApartments();
+    fetchRetreats();
+    fetchRooms();
+  }, []);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -88,68 +164,49 @@ export default function Home() {
     );
   }, [query]);
 
-  const [apartments, setApartments] = useState<Apartment[]>([]);
-  const [retreats, setRetreats] = useState<Retreat[]>([]);
-  const [hotels, setHotels] = useState<Hotel[]>([]);
-
-  const [loadingApartments, setLoadingApartments] = useState(true);
-  const [loadingRetreats, setLoadingRetreats] = useState(true);
-  const [loadingHotels, setLoadingHotels] = useState(true);
-
-  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
-
-  const fetchApartments = async () => {
-    try {
-      setLoadingApartments(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/apartments?page=1`);
-      if (!res.ok) throw new Error('Failed to fetch apartments');
-      const json: ApartmentResponse = await res.json();
-      setApartments(json.data);
-    } catch (error) {
-      console.error('Error fetching apartments:', error);
-    } finally {
-      setLoadingApartments(false);
-    }
-  };
-
-  const fetchRetreats = async () => {
-    try {
-      setLoadingRetreats(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/retreats?page=1`);
-      if (!res.ok) throw new Error('Failed to fetch retreats');
-      const json: RetreatResponse = await res.json();
-      setRetreats(json.data);
-    } catch (error) {
-      console.error('Error fetching retreats:', error);
-    } finally {
-      setLoadingRetreats(false);
-    }
-  };
-
-  const fetchRooms = async () => {
-    try {
-      setLoadingHotels(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/rooms?page=1`);
-      if (!res.ok) throw new Error('Failed to fetch hotels');
-      const json: HotelResponse = await res.json();
-      setHotels(json.data);
-    } catch (error) {
-      console.error('Error fetching hotels:', error);
-    } finally {
-      setLoadingHotels(false);
-    }
-  };
-
-  
-
-  useEffect(() => {
-    fetchApartments();
-    fetchRetreats();
-    fetchRooms();
-  }, []);
-
   return (
     <>
+      {/* Modal for Photo Details */}
+      {selectedPhotoItem && (
+        <div
+          className="fixed inset-0 bg-black/50 flex justify-center items-center z-50"
+          onClick={() => setSelectedPhotoItem(null)}
+        >
+          <div
+            className="bg-white p-6 rounded-lg shadow-md max-w-md w-full relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              onClick={() => setSelectedPhotoItem(null)}
+            >
+              &times;
+            </button>
+            <img
+              src={`${imageBaseUrl}/${selectedPhotoItem.photo.url || selectedPhotoItem.photo.path}`}
+              alt={selectedPhotoItem.title}
+              className="w-full h-64 object-cover rounded mb-4"
+            />
+            <h2 className="text-xl font-semibold text-blue-800 mb-2">{selectedPhotoItem.title}</h2>
+            {selectedPhotoItem.address && (
+              <p className="text-gray-700 mb-1">
+                <strong>Address:</strong> {selectedPhotoItem.address}
+              </p>
+            )}
+            {selectedPhotoItem.location && (
+              <p className="text-gray-700 mb-1">
+                <strong>Location:</strong> {selectedPhotoItem.location}
+              </p>
+            )}
+            {selectedPhotoItem.description && (
+              <p className="text-gray-700">
+                <strong>Description:</strong> {selectedPhotoItem.description}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Hero Carousel */}
       <div className="relative flex h-[400px] w-full overflow-hidden">
         <div className="flex-1">
@@ -177,13 +234,6 @@ export default function Home() {
       {/* Search Bar */}
       <div className="relative z-30 -mt-[100px] mx-6 py-6 px-4 flex justify-center bg-blue-800 rounded-lg shadow-lg">
         <div ref={containerRef} className="relative w-full md:w-1/2">
-          <span className="absolute inset-y-0 left-3 flex items-center text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M21 21l-4.35-4.35M9.5 17a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
-            </svg>
-          </span>
           <input
             type="text"
             value={query}
@@ -196,9 +246,15 @@ export default function Home() {
             <ul className="absolute mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-auto z-50">
               {filtered.length > 0 ? (
                 filtered.map((s, i) => (
-                  <li key={i} onClick={() => { setQuery(s.text); setOpen(false); }}
-                    className="px-4 py-2 text-blue-800 bg-blue-50 hover:bg-blue-100 cursor-pointer">
-                    <Link href={s.link} className="inline-block text-blue-600 hover:underline">{s.text}</Link>
+                  <li
+                    key={i}
+                    onClick={() => {
+                      setQuery(s.text);
+                      setOpen(false);
+                    }}
+                    className="px-4 py-2 text-blue-800 bg-blue-50 hover:bg-blue-100 cursor-pointer"
+                  >
+                    <Link href={s.link}>{s.text}</Link>
                   </li>
                 ))
               ) : (
@@ -219,10 +275,18 @@ export default function Home() {
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
             {hotels.slice(0, 3).map((hotel) => (
-              <Link
+              <div
                 key={hotel.id}
-                href={`/hotels/${hotel.id}`}
-                className="block border rounded-lg shadow hover:shadow-md p-4 text-center"
+                className="block border rounded-lg shadow hover:shadow-md p-4 text-center cursor-pointer"
+                onClick={() =>
+                  setSelectedPhotoItem({
+                    type: "hotel",
+                    title: hotel.name,
+                    description: hotel.description,
+                    address: hotel.address,
+                    photo: hotel.photos[0],
+                  })
+                }
               >
                 <img
                   src={
@@ -235,7 +299,7 @@ export default function Home() {
                 />
                 <h3 className="font-bold text-lg text-blue-800">{hotel.name}</h3>
                 <p className="text-gray-700">{hotel.address}</p>
-              </Link>
+              </div>
             ))}
           </div>
         )}
@@ -251,10 +315,17 @@ export default function Home() {
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
             {apartments.slice(0, 3).map((apartment) => (
-              <Link
+              <div
                 key={apartment.id}
-                href={`/apartments/${apartment.id}`}
-                className="block border rounded-lg shadow hover:shadow-md p-4 text-center"
+                className="block border rounded-lg shadow hover:shadow-md p-4 text-center cursor-pointer"
+                onClick={() =>
+                  setSelectedPhotoItem({
+                    type: "apartment",
+                    title: apartment.name,
+                    address: apartment.address,
+                    photo: apartment.photos[0],
+                  })
+                }
               >
                 <img
                   src={
@@ -267,7 +338,7 @@ export default function Home() {
                 />
                 <h3 className="font-bold text-lg text-blue-800">{apartment.name}</h3>
                 <p className="text-gray-700">{apartment.address}</p>
-              </Link>
+              </div>
             ))}
           </div>
         )}
@@ -283,10 +354,18 @@ export default function Home() {
         ) : (
           <div className="grid md:grid-cols-3 gap-6">
             {retreats.slice(0, 3).map((retreat) => (
-              <Link
+              <div
                 key={retreat.id}
-                href={`/retreats/${retreat.id}`}
-                className="block border rounded-lg shadow hover:shadow-md p-4 text-center"
+                className="block border rounded-lg shadow hover:shadow-md p-4 text-center cursor-pointer"
+                onClick={() =>
+                  setSelectedPhotoItem({
+                    type: "retreat",
+                    title: retreat.title,
+                    description: retreat.description,
+                    location: retreat.location,
+                    photo: retreat.photos[0],
+                  })
+                }
               >
                 <img
                   src={
@@ -299,7 +378,7 @@ export default function Home() {
                 />
                 <h3 className="font-bold text-lg text-blue-800">{retreat.title}</h3>
                 <p className="text-gray-700">{retreat.location}</p>
-              </Link>
+              </div>
             ))}
           </div>
         )}
