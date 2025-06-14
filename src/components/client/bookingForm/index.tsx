@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -8,12 +8,17 @@ interface BookingFormProps {
   propertyId: string;
   price: number;
   object_type: string;
+
 }
 
-const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_type }) => {
+const BookingForm: React.FC<BookingFormProps> = ({
+  propertyId,
+  price,
+  object_type,
+}) => {
   const initialFormState = {
-    from_date_time: "",
-    to_date_time: "",
+    from_date_time: new Date().toISOString().split("T")[0] + "T00:00",
+    to_date_time: new Date().toISOString().split("T")[0] + "T00:00",
     email: "",
     names: "",
     country: "",
@@ -22,13 +27,13 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
     object_id: propertyId,
     amount_to_pay: price.toString(),
     status: "",
-    payment_method: "",     // <-- New field
-    extra_note: "",  
-    momo_number:"",         // <-- New field
+    payment_method: "",
+    extra_note: "",
+    momo_number: "",
   };
 
-
   const [formData, setFormData] = useState(initialFormState);
+  const [calculatedPrice, setCalculatedPrice] = useState(0);
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"form" | "payment" | "otp" | "success">("form");
   const [isSending, setIsSending] = useState(false);
@@ -65,41 +70,50 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
   };
 
   const sendOtp = async () => {
-  const { momo_number, payment_method, email } = formData;
+    const { momo_number, payment_method, email } = formData;
 
-  if (!payment_method) {
-    return alert("Please select a payment method.");
-  }
-
-
-  // Only validate MoMo phone if payment method is 'momo'
-  if (payment_method === "momo") {
-    const momoRegex = /^2507\d{8}$/;
-    if (!momoRegex.test(momo_number)) {
-      return alert("Please enter a valid MoMo phone number (format: 2507XXXXXXXX).");
+    if (!payment_method) {
+      return alert("Please select a payment method.");
     }
-  }
 
-  setIsSending(true);
-  try {
-    const res = await fetch(`${apiUrl}/send-otp`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email:formData.email }),
-    });
+    if (payment_method === "momo") {
+      const momoRegex = /^2507\d{8}$/;
+      if (!momoRegex.test(momo_number)) {
+        return alert("Please enter a valid MoMo phone number (format: 2507XXXXXXXX).");
+      }
+    }
 
-    if (!res.ok) throw new Error("Failed to send OTP");
+    setIsSending(true);
+    try {
+      const res = await fetch(`${apiUrl}/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email }),
+      });
 
-    setStep("otp");
-  } catch (err) {
-    alert("Error sending OTP");
-    console.error(err);
-  } finally {
-    setIsSending(false);
-  }
-};
+      if (!res.ok) throw new Error("Failed to send OTP");
 
+      setStep("otp");
+    } catch (err) {
+      alert("Error sending OTP");
+      console.error(err);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  useEffect(() => {
+    const from = new Date(formData.from_date_time);
+    const to = new Date(formData.to_date_time);
+    const timeDiff = to.getTime() - from.getTime();
+    const dayDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+    const validDays = dayDiff > 0 ? dayDiff : 0;
+    const total = validDays * price;
+
+    setCalculatedPrice(total);
+    setFormData((prev) => ({ ...prev, amount_to_pay: total.toString() }));
+  }, [formData.from_date_time, formData.to_date_time, price]);
 
   const verifyOtp = async () => {
     setIsVerifying(true);
@@ -150,7 +164,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
               &times;
             </button>
 
-            {/* Step 1: User Info */}
             {step === "form" && (
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold text-black">Booking Details</h2>
@@ -186,6 +199,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
                     className="w-full p-2 border rounded mt-1 text-black"
                   />
                 </label>
+
+                <div className="text-black font-medium">
+                  Price per day: {price} <br />
+                  Total Price: <span className="font-bold">{calculatedPrice}</span>
+                </div>
 
                 <input
                   type="text"
@@ -230,7 +248,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
               </div>
             )}
 
-            {/* Step 2: Payment Method */}
             {step === "payment" && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-black">Choose Payment Method</h2>
@@ -258,17 +275,20 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
                         name="momo_number"
                         placeholder="momo_number (e.g., 2507XXXXXXXX)"
                         value={formData.momo_number}
-                        onChange={(e) => handleInputChange({ name: "momo_number", value: e.target.value })}
+                        onChange={(e) =>
+                          handleInputChange({ name: "momo_number", value: e.target.value })
+                        }
                         className="w-full p-2 border rounded text-black"
-                       />
+                      />
                       <textarea
                         name="extra_note"
                         placeholder="Additional Notes (optional)"
                         value={formData.extra_note}
-                        onChange={(e) => handleInputChange({ name: "extra_note", value: e.target.value })}
-                        className="w-full p-2 border rounded text-black"
+                        onChange={(e) =>
+                          handleInputChange({ name: "extra_note", value: e.target.value })
+                        }
+                        className="w-full p-2 border rounded text-black mt-2"
                       />
-
                     </label>
                   </div>
                 )}
@@ -292,8 +312,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
               </div>
             )}
 
-
-            {/* Step 3: OTP Verification */}
             {step === "otp" && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-black">Verify OTP</h2>
@@ -315,7 +333,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ propertyId, price, object_typ
               </div>
             )}
 
-            {/* Step 4: Success */}
             {step === "success" && (
               <div className="text-center space-y-4">
                 <h2 className="text-xl font-bold text-green-700">Booking Confirmed!</h2>
