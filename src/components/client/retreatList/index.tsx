@@ -260,8 +260,8 @@ export default function RetreatList() {
                 <h2 className="text-xl font-semibold text-indigo-600">{retreat.title}</h2>
                 <p className="text-md text-gray-500">{retreat.address}</p>
                 <p className="text-gray-600 mt-1">Price: ${retreat.capacity}</p>
-                <p className="text-gray-600 mt-1">Price/Person: {retreat.price_per_person} people</p>
-                 <p className="text-gray-600 mt-1">Package Price: {retreat.package_price} people</p>
+                <p className="text-gray-600 mt-1">Price/Person: {retreat.price_per_person} </p>
+                 <p className="text-gray-600 mt-1">Package Price: {retreat.package_price} </p>
                 <div className="mt-4 space-y-2">
                   <button
                     onClick={() => openDetailModal(retreat)}

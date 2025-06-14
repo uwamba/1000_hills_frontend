@@ -23,8 +23,7 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
   seatLayout,
 }) => {
   const [formData, setFormData] = useState({
-    from_date_time: "",
-    to_date_time: "",
+
     email: "",
     names: "",
     country: "",
@@ -32,12 +31,16 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
     object_type,
     object_id: propertyId,
     amount_to_pay: price.toString(),
-    seat_number: "",
+    seat: "",
     status: "",
+
+    payment_method: "",     // <-- New field
+    extra_note: "",
+    momo_number: "",
   });
 
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"select-seat" | "form" | "otp" | "success">("select-seat");
+  const [step, setStep] = useState<"select-seat" | "form" | "otp" | "payment" | "success">("select-seat");
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -50,8 +53,6 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
   const closeModal = () => {
     setShowModal(false);
     setFormData({
-      from_date_time: "",
-      to_date_time: "",
       email: "",
       names: "",
       country: "",
@@ -59,27 +60,32 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
       object_type,
       object_id: propertyId,
       amount_to_pay: price.toString(),
-      seat_number: "",
+      seat: "",
       status: "",
+
+      payment_method: "",     // <-- New field
+      extra_note: "",
+      momo_number: "",
     });
     setOtp("");
     setStep("select-seat");
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const goToPaymentStep = () => {
+
+    if (!formData.email || !formData.names || !formData.phone || !formData.country) {
+      return alert("Please complete all personal details.");
+    }
+    setStep("payment");
   };
 
   const handleSeatSelect = (seatNumber: number) => {
-    setFormData((prev) => ({ ...prev, seat_number: seatNumber.toString() }));
+    setFormData((prev) => ({ ...prev, seat: seatNumber.toString() }));
     setStep("form");
   };
 
   const sendOtp = async () => {
-    if (!formData.from_date_time || !formData.to_date_time) {
-      return alert("Please select both From and To dates before continuing.");
-    }
+
 
     setIsSending(true);
     try {
@@ -126,7 +132,12 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
       setIsVerifying(false);
     }
   };
-
+const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { name: string; value: string }
+  ) => {
+    const { name, value } = "target" in e ? e.target : e;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
   const renderSeatLayout = () => {
     const { row, seats_per_row, exclude } = seatLayout;
     const layout = [];
@@ -136,20 +147,19 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
       const rowSeats = [];
       for (let s = 0; s < seats_per_row; s++) {
         const isExcluded = exclude.includes(seatId);
-        const isSelected = formData.seat_number === seatId.toString();
+        const isSelected = formData.seat === seatId.toString();
 
         rowSeats.push(
           <button
             key={seatId}
             disabled={isExcluded}
             onClick={() => handleSeatSelect(seatId)}
-            className={`m-1 p-2 rounded ${
-              isExcluded
+            className={`m-1 p-2 rounded ${isExcluded
                 ? "bg-gray-300 cursor-not-allowed"
                 : isSelected
-                ? "bg-green-500 text-white"
-                : "bg-blue-500 text-white"
-            }`}
+                  ? "bg-green-500 text-white"
+                  : "bg-blue-500 text-white"
+              }`}
           >
             <FaChair />
             <span className="block text-xs">{seatId}</span>
@@ -185,7 +195,7 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 relative">
             <button
               onClick={closeModal}
-              className="absolute top-3 right-3 text-gray-600 hover:text-black"
+              className="absolute top-3 right-3 text-black-600 hover:text-black"
             >
               <FaTimes size={18} />
             </button>
@@ -199,22 +209,9 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
 
             {step === "form" && (
               <>
-                <h2 className="text-lg font-bold mb-4">Enter Booking Details</h2>
+                <h2 className="text-lg font-bold mb-4 text-black-600">Enter Booking Details</h2>
                 <div className="space-y-2">
-                  <input
-                    name="from_date_time"
-                    type="datetime-local"
-                    value={formData.from_date_time}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
-                  />
-                  <input
-                    name="to_date_time"
-                    type="datetime-local"
-                    value={formData.to_date_time}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
-                  />
+
                   <input
                     name="names"
                     placeholder="Full Names"
@@ -245,20 +242,88 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
                     className="w-full p-2 border rounded"
                   />
 
+              
+
+                  <div className="flex justify-between">
+                 
                   <button
-                    onClick={sendOtp}
+                    type="button"
+                    onClick={goToPaymentStep}
                     disabled={isSending}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded mt-2"
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                   >
-                    {isSending ? "Sending OTP..." : "Send OTP"}
+                    {isSending ? "Sending OTP..." : "Continue"}
                   </button>
+                </div>
+
+                  
                 </div>
               </>
             )}
+            {/* Step 2: Payment Method */}
+            {step === "payment" && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold text-black">Choose Payment Method</h2>
 
+                <label className="block">
+                  <span className="text-black">Payment Method</span>
+                  <select
+                    name="payment_method"
+                    value={formData.payment_method}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded mt-1 text-black"
+                  >
+                    <option value="">-- Select Payment Method --</option>
+                    <option value="momo_rwanda">MOMO (MTN Rwanda)</option>
+                    <option value="flutterwave">Flutterwave (MOMO, Airtel, Card, Bank Transfer)</option>
+                  </select>
+                </label>
+
+                {formData.payment_method === "momo_rwanda" && (
+                  <div>
+                    <label className="block">
+                      <span className="text-black">MoMo Phone Number</span>
+                      <input
+                        type="number"
+                        name="momo_number"
+                        placeholder="momo_number (e.g., 2507XXXXXXXX)"
+                        value={formData.momo_number}
+                        onChange={(e) => handleInputChange({ name: "momo_number", value: e.target.value })}
+                        className="w-full p-2 border rounded text-black"
+                      />
+                      <textarea
+                        name="extra_note"
+                        placeholder="Additional Notes (optional)"
+                        value={formData.extra_note}
+                        onChange={(e) => handleInputChange({ name: "extra_note", value: e.target.value })}
+                        className="w-full p-2 border rounded text-black"
+                      />
+
+                    </label>
+                  </div>
+                )}
+
+                <div className="flex justify-between">
+                  <button
+                    onClick={() => setStep("form")}
+                    className="px-4 py-2 bg-gray-300 text-black rounded"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={sendOtp}
+                    disabled={isSending}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    {isSending ? "Sending OTP..." : "Continue"}
+                  </button>
+                </div>
+              </div>
+            )}
             {step === "otp" && (
               <>
-                <h2 className="text-lg font-bold mb-4">Enter OTP</h2>
+                <h2 className="text-lg font-bold mb-4 text-black-600">Enter OTP</h2>
                 <input
                   type="text"
                   placeholder="Enter OTP"

@@ -13,17 +13,25 @@ interface Room {
   id: number;
   name: string;
   price: number;
+  type: string;
   capacity: number;
   description: string;
   status: string | null;
   deleted_on: string | null;
   photos: Photo[];
+  hotel:Hotel | null;
 }
 
 interface RoomResponse {
   current_page: number;
   last_page: number;
   data: Room[];
+}
+interface Hotel{
+  id: number;
+  name: string;
+  stars: string;
+
 }
 
 export default function RoomListClientPage() {
@@ -197,13 +205,13 @@ export default function RoomListClientPage() {
                 <h2 className="text-xl font-semibold text-indigo-600">{room.name}</h2>
                 <p className="text-gray-700 mt-2">{room.description}</p>
                 <p className="text-gray-600 mt-1">Price: ${room.price}</p>
-                <p className="text-gray-600 mt-1">Capacity: {room.capacity} people</p>
+                <p className="text-gray-600 mt-1">Hotel: {room.hotel?.name}</p>
 
                 <div className="mt-2 text-sm text-gray-600 space-y-1">
                   <div>
-                    <span className="font-medium">Status:</span>{' '}
-                    <span className={room.status === 'available' ? 'text-green-600' : 'text-red-600'}>
-                      {room.status || 'N/A'}
+                    <span className="font-medium">Type:</span>{' '}
+                    <span className= 'text-green-600'>
+                      {room.type || 'N/A'}
                     </span>
                   </div>
                   {room.deleted_on && (
