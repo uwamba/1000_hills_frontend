@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { useRouter } from 'next/navigation';
+import BookingModal from '../bookingFormApartment';
 
 interface Photo {
   id: number;
@@ -20,8 +21,8 @@ interface Apartment {
   status: string | null;
   deleted_on: string | null;
   photos: Photo[];
-  price_per_night?: number;
-  price_per_month?: number;
+  price_per_night: number;
+  price_per_month: number;
   currency?: string;
 }
 
@@ -41,8 +42,6 @@ export default function ApartmentList() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-
-  const [pricePerMonth, setPricePerMonth] = useState(0);
   const [pricePerDay, setPricePerDay] = useState(0);
 
   const [formData, setFormData] = useState({
@@ -65,6 +64,9 @@ export default function ApartmentList() {
     from_date: '',
     to_date: '',
   });
+
+
+
 
 
 
@@ -114,45 +116,7 @@ export default function ApartmentList() {
 
 
 
-  useEffect(() => {
-    const fromDate = new Date(formData.from);
-    const toDate = new Date(formData.to);
-
-    if (!formData.from || !formData.to || toDate <= fromDate) {
-      setTotalPrice(0);
-      return;
-    }
-
-    const diffInTime = toDate.getTime() - fromDate.getTime();
-    const days = diffInTime / (1000 * 3600 * 24);
-
-    if (formData.pricing_method === "monthly") {
-      const months = toDate.getMonth() - fromDate.getMonth() + (12 * (toDate.getFullYear() - fromDate.getFullYear()));
-      setTotalPrice(months >= 1 ? months * pricePerMonth : 0);
-    } else {
-      setTotalPrice(Math.ceil(days) * pricePerDay);
-    }
-  }, [formData.from, formData.to, formData.pricing_method]);
-
-  const goToPaymentStep = () => {
-    if (!formData.from || !formData.to) {
-      return alert("Please select both From and To dates.");
-    }
-
-    if (!formData.name || !formData.email || !formData.phone || !formData.country) {
-      return alert("Please fill all required fields.");
-    }
-
-    if (formData.pricing_method === "monthly") {
-      const from = new Date(formData.from);
-      const to = new Date(formData.to);
-      const months = to.getMonth() - from.getMonth() + (12 * (to.getFullYear() - from.getFullYear()));
-      if (months < 1) return alert("Monthly bookings must be at least 1 full month.");
-    }
-
-    setStep("payment");
-  };
-
+  
   const handlePrev = () => page > 1 && fetchApartments(page - 1);
   const handleNext = () => page < lastPage && fetchApartments(page + 1);
 
@@ -169,7 +133,7 @@ export default function ApartmentList() {
   };
 
   const openBookingModal = (apartment: Apartment) => {
-    setSelectedApartment(apartment);
+     setSelectedApartment(apartment);
     setPricePerDay
     
     setFormData({
@@ -201,21 +165,9 @@ export default function ApartmentList() {
   };
 
   
-  const sendOtp = () => {
-    setIsSending(true);
-    setTimeout(() => {
-      setIsSending(false);
-      setStep('otp');
-    }, 1000);
-  };
+  
 
-  const verifyOtp = () => {
-    setIsVerifying(true);
-    setTimeout(() => {
-      setIsVerifying(false);
-      setStep('success');
-    }, 1000);
-  };
+ 
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -378,6 +330,7 @@ export default function ApartmentList() {
                   onClick={() => {
                     closeDetailModal();
                     openBookingModal(selectedApartment);
+                    selectedApartment.id
                   }}
                   className="mt-4 w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                 >
@@ -390,182 +343,13 @@ export default function ApartmentList() {
       </Dialog>
 
       {/* Booking Modal */}
-      <Dialog open={isBookingModalOpen} onClose={closeModal} className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <Dialog.Panel className="bg-white max-w-md w-full rounded-lg shadow-lg p-6 relative">
-          <button
-            onClick={closeModal}
-            className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl"
-          >
-            &times;
-          </button>
+      <BookingModal
+  isOpen={isBookingModalOpen}
+  closeModal={() => setIsBookingModalOpen(false)}
+  apartment={selectedApartment} // pass the full apartment object here
+/>
+      
 
-          {step === "form" && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-black">Book Apartment</h2>
-
-              {/* Pricing Method */}
-              <label className="block">
-                <span className="text-black">Pricing Method</span>
-                <select
-                  name="pricing_method"
-                  value={formData.pricing_method}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded text-black"
-                >
-                  <option value="daily">Per Day</option>
-                  <option value="monthly">Per Month</option>
-                </select>
-              </label>
-
-              {/* Form Fields */}
-              <input
-                  type="text"
-                  name="names"
-                  placeholder="Full Name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded text-black"
-                />
-                <input
-                  type="text"
-                  name="country"
-                  placeholder="Country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded text-black"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded text-black"
-                />
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded text-black"
-                />
-              <label className="block">
-                <span className="text-black">From</span>
-                <input
-                  type="date"
-                  name="from"
-                  value={formData.from}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded text-black"
-                />
-              </label>
-              <label className="block">
-                <span className="text-black">To</span>
-                <input
-                  type="date"
-                  name="to"
-                  value={formData.to}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded text-black"
-                />
-              </label>
-
-              <div className="text-black font-semibold">
-                Total Price: {totalPrice.toLocaleString()} RWF
-              </div>
-
-              <div className="flex justify-between">
-                <button onClick={closeModal} className="px-4 py-2 bg-gray-300 text-black rounded">
-                  Cancel
-                </button>
-                <button
-                  onClick={goToPaymentStep}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Continue to Payment
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === "payment" && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-black">Choose Payment Method</h2>
-              <label className="block">
-                <span className="text-black">Payment Method</span>
-                <select
-                  name="payment_method"
-                  value={formData.payment_method}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded text-black"
-                >
-                  <option value="">Select a payment method</option>
-                  <option value="momo">Mobile Money</option>
-                  <option value="card">Credit Card</option>
-                </select>
-              </label>
-
-              {formData.payment_method === "momo" && (
-                <label className="block">
-                  <span className="text-black">Mobile Money Number</span>
-                  <input
-                    type="text"
-                    name="momo_number"
-                    value={formData.momo_number}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded text-black"
-                  />
-                </label>
-              )}
-
-              <div className="flex justify-between">
-                <button onClick={() => setStep("form")} className="px-4 py-2 bg-gray-300 text-black rounded">
-                  Back
-                </button>
-                <button
-                  onClick={sendOtp}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  {isSending ? "Sending OTP..." : "Send OTP"}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === "otp" && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-black">Enter OTP</h2>
-              <input
-                type="text"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                className="w-full p-2 border rounded text-black"
-                placeholder="Enter OTP"
-              />
-              <div className="flex justify-between">
-                <button onClick={() => setStep("payment")} className="px-4 py-2 bg-gray-300 text-black rounded">
-                  Back
-                </button>
-                <button
-                  onClick={verifyOtp}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  {isVerifying ? "Verifying..." : "Verify OTP"}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === "success" && (
-            <div className="text-center text-green-600 font-semibold">
-              Booking successful! 🎉
-            </div>
-          )}
-        </Dialog.Panel>
-      </div>
-    </Dialog>
     </div>
   );
 }
