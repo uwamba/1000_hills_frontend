@@ -21,12 +21,14 @@ const defaultApartmentData = {
   sauna_massage: false,
   price_per_night: "",
   monthly_price: "",
+  contract: "",
 };
 
 export default function ApartmentFormPage() {
   const [formData, setFormData] = useState(defaultApartmentData);
   const [photos, setPhotos] = useState<File[]>([]);
   const [isMapOpen, setIsMapOpen] = useState(false);
+  const [contractFile, setContractFile] = useState<File | null>(null);
 
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
@@ -36,7 +38,11 @@ export default function ApartmentFormPage() {
     lat: parseFloat(formData.coordinate.lat) || -1.9441,
     lng: parseFloat(formData.coordinate.lng) || 30.0619,
   };
-
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setContractFile(e.target.files[0]);
+    }
+  };
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -124,6 +130,10 @@ export default function ApartmentFormPage() {
           body: formPayload,
         }
       );
+      if (contractFile) {
+        formPayload.append("contract", contractFile);
+      }
+      
 
       if (response.ok) {
         alert("Apartment successfully added!");
@@ -346,7 +356,18 @@ export default function ApartmentFormPage() {
           </GoogleMap>
         </div>
       )}
-
+               <div>
+              <label htmlFor="contract" className="block text-sm font-medium text-gray-700">
+                Contract File (PDF/DOC)
+              </label>
+              <input
+                type="file"
+                name="contract"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileChange}
+                className="w-full rounded-md border px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
       <div>
         <button
           type="submit"

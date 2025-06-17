@@ -11,6 +11,7 @@ interface FormDataType {
     lng: string;
   };
   description: string;
+  contract: File | null;
   stars: number;
   working_time: string;
   status: string;
@@ -22,6 +23,7 @@ export default function HotelForm() {
     address: "",
     coordinate: { lat: "", lng: "" },
     description: "",
+    contract: null,
     stars: 1,
     working_time: "",
     status: "",
@@ -45,6 +47,76 @@ export default function HotelForm() {
   const center = {
     lat: parseFloat(formData.coordinate.lat) || -1.9441,
     lng: parseFloat(formData.coordinate.lng) || 30.0619,
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        contract: file,
+      }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const formPayload = new FormData();
+    formPayload.append("name", formData.name);
+    formPayload.append("address", formData.address);
+    formPayload.append("description", formData.description);
+    if (formData.contract) {
+      formPayload.append("contract", formData.contract);
+    }
+    formPayload.append("stars", formData.stars.toString());
+    formPayload.append("working_time", formData.working_time);
+    formPayload.append("status", formData.status);
+    formPayload.append(
+      "coordinate",
+      `${formData.coordinate.lat},${formData.coordinate.lng}`
+    );
+
+    photos.forEach((photo) => {
+      if (photo instanceof File && photo.size > 0) {
+        formPayload.append("photos[]", photo);
+      }
+    });
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: formPayload,
+        }
+      );
+
+      if (response.ok) {
+        alert("Hotel successfully added!");
+        setFormData({
+          name: "",
+          address: "",
+          coordinate: { lat: "", lng: "" },
+          description: "",
+          contract: null,
+          stars: 1,
+          working_time: "",
+          status: "",
+        });
+        setPhotos([]);
+      } else {
+        const errorText = await response.text();
+        console.error("Server error:", errorText);
+        alert("Failed to add hotel.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("There was an error adding the hotel.");
+    }
   };
 
   const handleChange = (
@@ -91,62 +163,6 @@ export default function HotelForm() {
         coordinate: { lat, lng },
       }));
       setShowMap(false); // close the modal after selecting
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const formPayload = new FormData();
-    formPayload.append("name", formData.name);
-    formPayload.append("address", formData.address);
-    formPayload.append("description", formData.description);
-    formPayload.append("stars", formData.stars.toString());
-    formPayload.append("working_time", formData.working_time);
-    formPayload.append("status", formData.status);
-    formPayload.append(
-      "coordinate",
-      `${formData.coordinate.lat},${formData.coordinate.lng}`
-    );
-
-    photos.forEach((photo) => {
-      if (photo instanceof File && photo.size > 0) {
-        formPayload.append("photos[]", photo);
-      }
-    });
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: formPayload,
-        }
-      );
-
-      if (response.ok) {
-        alert("Hotel successfully added!");
-        setFormData({
-          name: "",
-          address: "",
-          coordinate: { lat: "", lng: "" },
-          description: "",
-          stars: 1,
-          working_time: "",
-          status: "",
-        });
-        setPhotos([]);
-      } else {
-        const errorText = await response.text();
-        console.error("Server error:", errorText);
-        alert("Failed to add hotel.");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("There was an error adding the hotel.");
     }
   };
 
@@ -248,6 +264,20 @@ export default function HotelForm() {
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-900">
+            Contract Document
+          </label>
+          <input
+            type="file"
+            name="contract"
+            accept=".pdf,.doc,.docx"
+            onChange={handleFileChange}
+            required
+            className="block w-full text-sm text-gray-900 border border-gray-300 rounded cursor-pointer bg-gray-50 focus:outline-none"
+          />
         </div>
 
         <div className="md:col-span-2 flex flex-col">

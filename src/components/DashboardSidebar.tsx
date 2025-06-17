@@ -104,17 +104,7 @@ export default function DashboardSidebar() {
           </SidebarGroup>
 
           {/* Retreat Management under Hotel Management */}
-          <SidebarGroup
-            label="Event & Meeting"
-            icon={<Folder size={16} />}
-            open={openRetreat}
-            toggle={() => setOpenRetreat(!openRetreat)}
-          >
-            <SidebarSubItem href="/dashboard/retreat/add" label="Add New Retreat" icon={<BedDouble size={16} />} />
-            <SidebarSubItem href="/dashboard/retreat/list" label="Retreat List" icon={<List size={16} />} />
-            <SidebarSubItem href="/dashboard/retreat/booking" label="Retreat Booking" icon={<CalendarCheck size={16} />} />
-            <SidebarSubItem href="/dashboard/retreat/payment" label="Retreat Payment" icon={<CreditCard size={16} />} />
-          </SidebarGroup>
+          
         </SidebarGroup>
 
         {/* Bus Tickets Management Group */}
