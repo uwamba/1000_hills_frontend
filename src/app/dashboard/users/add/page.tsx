@@ -40,7 +40,7 @@ export default function AdminRegistrationForm() {
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/hotels/names`, {
             headers: { Authorization: `Bearer ${authToken}` },
           }),
-          fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartments/names`, {
+          fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/apartment-owners/names`, {
             headers: { Authorization: `Bearer ${authToken}` },
           }),
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/agencies/names`, {

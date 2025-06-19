@@ -33,7 +33,6 @@ export default function DashboardSidebar() {
 
   const [openBooking, setOpenBooking] = useState(false);
   const [openPayment, setOpenPayment] = useState(false);
-  const [openApartOwner, setOpenApartOwner] = useState(false);
 
   return (
     <aside className="w-64 h-screen overflow-y-auto bg-gray-900 text-white p-4 space-y-6">
@@ -85,10 +84,6 @@ export default function DashboardSidebar() {
             open={openApartments}
             toggle={() => setOpenApartments(!openApartments)}
           >
-
-            <SidebarSubItem href="/dashboard/apartmentOwner/add" label="Add New Apartment Owner" icon={<BedDouble size={16} />} />
-            <SidebarSubItem href="/dashboard/apartmentOwner/list" label="Apartment Owner List" icon={<BedDouble size={16} />} />
-
             <SidebarSubItem href="/dashboard/apartment/add" label="Add New Apartment" icon={<BedDouble size={16} />} />
             <SidebarSubItem href="/dashboard/apartment/list" label="Apartment List" icon={<List size={16} />} />
             <SidebarSubItem href="/dashboard/apartment/booking" label="Apartment Booking" icon={<CalendarCheck size={16} />} />

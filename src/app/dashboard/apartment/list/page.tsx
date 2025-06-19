@@ -171,7 +171,6 @@ export default function ApartmentListPage() {
                 <h2 className="text-xl font-bold mt-2">{apartment.name}</h2>
                 <p>{apartment.location}</p>
                 <p>{apartment.description}</p>
-                <p>{apartment.photos[0].url}</p>
                 <p>Rooms: {apartment.rooms}</p>
                 <p>Status: {apartment.status ?? 'N/A'}</p>
                 {apartment.deleted_on && <p className="text-red-600">Deleted On: {new Date(apartment.deleted_on).toLocaleDateString()}</p>}
