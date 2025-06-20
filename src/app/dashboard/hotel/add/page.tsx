@@ -32,17 +32,21 @@ export default function HotelForm() {
   const [photos, setPhotos] = useState<File[]>([]);
   const [authToken, setAuthToken] = useState<string>("");
   const [showMap, setShowMap] = useState(false);
+  const isBrowser = typeof window !== "undefined";
+
+  const { isLoaded } = isBrowser
+    ? useJsApiLoader({
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+        libraries: ["maps"],
+      })
+    : { isLoaded: false };
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      setAuthToken(token);
+    if (isBrowser) {
+      const token = localStorage.getItem("authToken");
+      if (token) setAuthToken(token);
     }
-  }, []);
-
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-  });
+  }, [isBrowser]);
 
   const center = {
     lat: parseFloat(formData.coordinate.lat) || -1.9441,
@@ -66,9 +70,7 @@ export default function HotelForm() {
     formPayload.append("name", formData.name);
     formPayload.append("address", formData.address);
     formPayload.append("description", formData.description);
-    if (formData.contract) {
-      formPayload.append("contract", formData.contract);
-    }
+    if (formData.contract) formPayload.append("contract", formData.contract);
     formPayload.append("stars", formData.stars.toString());
     formPayload.append("working_time", formData.working_time);
     formPayload.append("status", formData.status);
@@ -76,7 +78,6 @@ export default function HotelForm() {
       "coordinate",
       `${formData.coordinate.lat},${formData.coordinate.lng}`
     );
-
     photos.forEach((photo) => {
       if (photo instanceof File && photo.size > 0) {
         formPayload.append("photos[]", photo);
@@ -127,15 +128,9 @@ export default function HotelForm() {
     const { name, value } = e.target;
 
     if (name === "stars") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: parseInt(value),
-      }));
+      setFormData((prev) => ({ ...prev, [name]: parseInt(value) }));
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
