@@ -25,7 +25,7 @@ const defaultApartmentData = {
   room_service: false,
   sauna_massage: false,
   price_per_night: "",
-  monthly_price: "",
+  price_per_month: "",
   contract: "", // we handle file separately
   apartment_owner_id: "", // new field: store as string, convert to int on submit
 };
@@ -191,7 +191,7 @@ export default function ApartmentFormPage() {
       formData.sauna_massage ? "1" : "0"
     );
     formPayload.append("price_per_night", formData.price_per_night);
-    formPayload.append("monthly_price", formData.monthly_price);
+    formPayload.append("price_per_month", formData.price_per_month);
     // Append the owner ID (convert to integer string if needed)
     formPayload.append(
       "apartment_owner_id",
@@ -306,11 +306,13 @@ export default function ApartmentFormPage() {
             Price Per Night
           </label>
           <input
-            type="text"
-            name="price_per_night"
-            value={formData.price_per_night}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+               type="number"
+               name="price_per_night"
+               value={formData.price_per_night}
+               onChange={(e) =>
+                 setFormData({ ...formData, price_per_night: e.target.value })
+               }
+               required
           />
         </div>
 
@@ -320,11 +322,13 @@ export default function ApartmentFormPage() {
             Monthly Price
           </label>
           <input
-            type="text"
-            name="monthly_price"
-            value={formData.monthly_price}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded"
+               type="number"
+               name="price_per_month"
+               value={formData.price_per_month}
+               onChange={(e) =>
+                 setFormData({ ...formData, price_per_month: e.target.value })
+               }
+               required
           />
         </div>
 
