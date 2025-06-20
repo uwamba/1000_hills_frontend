@@ -22,7 +22,7 @@ interface Apartment {
   kitchen_outside: boolean;
   number_of_floor: number;
   status: string | null;
-  
+
   deleted_on: string | null;
   photos: Photo[];
 }
@@ -88,9 +88,9 @@ type PhotoItem = {
 
 export default function Home() {
   const [isClient, setIsClient] = useState(false);
-   const [selectedRetreat, setSelectedRetreat] = useState<Retreat | null>(null);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [selectedRetreat, setSelectedRetreat] = useState<Retreat | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
   useEffect(() => {
     setIsClient(true);
@@ -102,11 +102,11 @@ export default function Home() {
     { text: "Bus ticketing", link: "/busListing" },
   ];
 
-   const openDetailModal = (retreat: Retreat) => {
-      setSelectedRetreat(retreat);
-      setSelectedPhotoIndex(0);
-      setIsDetailModalOpen(true);
-    };
+  const openDetailModal = (retreat: Retreat) => {
+    setSelectedRetreat(retreat);
+    setSelectedPhotoIndex(0);
+    setIsDetailModalOpen(true);
+  };
 
   const [query, setQuery] = useState("");
   const [filtered, setFiltered] = useState<{ text: string; link: string }[]>([]);
@@ -125,23 +125,23 @@ export default function Home() {
 
   const imageBaseUrl =
     process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || "http://localhost:3000/images";
-    const [isBookingOpen, setIsBookingOpen] = useState(false);
-    const closeDetailModal = () => {
-        setIsDetailModalOpen(false);
-        setSelectedRetreat(null);
-      };
-    
-      const handleBookNow = (retreat: Retreat) => {
-        setSelectedRetreat(retreat);
-        setIsDetailModalOpen(false);
-        setIsBookingOpen(true);
-      };
-    
-      const closeBookingModal = () => {
-        setIsBookingOpen(false);
-        setSelectedRetreat(null);
-      };
-    
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const closeDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setSelectedRetreat(null);
+  };
+
+  const handleBookNow = (retreat: Retreat) => {
+    setSelectedRetreat(retreat);
+    setIsDetailModalOpen(false);
+    setIsBookingOpen(true);
+  };
+
+  const closeBookingModal = () => {
+    setIsBookingOpen(false);
+    setSelectedRetreat(null);
+  };
+
 
   const fetchApartments = async () => {
     try {
@@ -178,7 +178,7 @@ export default function Home() {
       const data = await res.json();
 
       console.log(data)
-  
+
       if (Array.isArray(data)) {
         setRooms(data);
       } else {
@@ -191,7 +191,7 @@ export default function Home() {
       setLoadingHotels(false);
     }
   };
-  
+
 
   useEffect(() => {
     fetchRooms();
@@ -317,91 +317,67 @@ export default function Home() {
       </div>
 
       {/* Featured Hotels */}
-     
-     
-      <section className="py-10 px-4 mx-[100px]">
-      <h2 className="text-2xl font-semibold mb-6 text-center text-blue-800">
-        Featured Hotel Rooms
-      </h2>
-      {loadingHotels ? (
-        <p className="text-center text-gray-500">Loading Rooms...</p>
-      ) : rooms.length === 0 ? (
-        <p className="text-center text-gray-500">No Room found.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rooms.map((room) => (
-            <Link
-              key={room.id}
-              href={{ pathname: "/roomList/more", query: { roomId: room.id } }}
-              className="block bg-white rounded-lg shadow-lg p-4 border border-gray-300 hover:shadow-2xl transition-transform transform hover:scale-105"
-            >
-              <div className="w-full h-48 mb-4 overflow-hidden rounded-lg">
-                <img
-                  src={
-                    room.photos?.length > 0
-                      ? `${imageBaseUrl}/${room.photos[0].path}`
-                      : "/placeholder.jpg"
-                  }
-                  alt={room.name}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-              <h2 className="text-xl font-semibold text-indigo-600">{room.name}</h2>
-              <p className="text-gray-700 mt-2">{room.description}</p>
-              <p className="text-gray-600 mt-1">Price: ${room.price}</p>
-              <p className="text-gray-600 mt-1">Hotel: {room.hotel?.name}</p>
-              <div className="mt-2 text-sm text-gray-600 space-y-1">
-                <div>
-                  <span className="font-medium">Type:</span>{" "}
-                  <span className="text-green-600">{room.type || "N/A"}</span>
+      <section className="py-10 px-4 sm:px-6 lg:px-20">
+        <h2 className="text-2xl font-semibold mb-6 text-center text-blue-800">Featured Hotel Rooms</h2>
+        {loadingHotels ? (
+          <p className="text-center text-gray-500">Loading Rooms...</p>
+        ) : rooms.length === 0 ? (
+          <p className="text-center text-gray-500">No Room found.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rooms.map((room) => (
+              <Link
+                key={room.id}
+                href={{ pathname: "/roomList/more", query: { roomId: room.id } }}
+                className="block bg-white rounded-lg shadow-lg p-4 border border-gray-300 hover:shadow-2xl transition-transform transform hover:scale-105"
+              >
+                <div className="w-full h-48 mb-4 overflow-hidden rounded-lg">
+                  <img
+                    src={room.photos?.length > 0 ? `${imageBaseUrl}/${room.photos[0].path}` : "/placeholder.jpg"}
+                    alt={room.name}
+                    className="object-cover w-full h-full"
+                  />
                 </div>
-                {room.deleted_on && (
-                  <div className="text-red-500">
-                    <span className="font-medium">Deleted On:</span>{" "}
-                    {new Date(room.deleted_on).toLocaleDateString()}
-                  </div>
-                )}
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </section>
+                <h2 className="text-xl font-semibold text-indigo-600">{room.name}</h2>
+                <p className="text-gray-700 mt-2">{room.description}</p>
+                <p className="text-gray-600 mt-1">Price: ${room.price}</p>
+                <p className="text-gray-600 mt-1">Hotel: {room.hotel?.name}</p>
+                <div className="mt-2 text-sm text-gray-600 space-y-1">
+                  <div><span className="font-medium">Type:</span> <span className="text-green-600">{room.type || "N/A"}</span></div>
+                  {room.deleted_on && (
+                    <div className="text-red-500">
+                      <span className="font-medium">Deleted On:</span> {new Date(room.deleted_on).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Featured Apartments */}
-      <section className="py-10 px-4 mx-[100px]">
+      <section className="py-10 px-4 sm:px-6 lg:px-20">
         <h2 className="text-2xl font-semibold mb-6 text-center text-blue-800">Featured Apartments</h2>
         {loadingApartments ? (
           <p className="text-center text-gray-500">Loading apartments...</p>
         ) : apartments.length === 0 ? (
           <p className="text-center text-gray-500">No apartments found.</p>
         ) : (
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {apartments.map((apartment) => (
               <div
                 key={apartment.id}
                 className="block border rounded-lg shadow hover:shadow-md p-4 text-center cursor-pointer"
-                onClick={() =>
-                  setSelectedPhotoItem({
-                    type: "apartment",
-                    title: apartment.name,
-                    address: apartment.address,
-                    photo: apartment.photos[0],
-                  })
-                }
+                onClick={() => setSelectedPhotoItem({ type: "apartment", title: apartment.name, address: apartment.address, photo: apartment.photos[0] })}
               >
-                <img 
-                  src={
-                    apartment.photos?.length > 0
-                      ? `${imageBaseUrl}/${apartment.photos[0].path}`
-                      : "/placeholder.jpg"
-                  }
+                <img
+                  src={apartment.photos?.length > 0 ? `${imageBaseUrl}/${apartment.photos[0].path}` : "/placeholder.jpg"}
                   alt={apartment.name}
                   className="w-full h-48 object-cover rounded-lg mb-2"
                 />
                 <h3 className="font-bold text-lg text-blue-800">{apartment.name}</h3>
                 <p className="text-gray-700">{apartment.address}</p>
-                
               </div>
             ))}
           </div>
@@ -409,131 +385,122 @@ export default function Home() {
       </section>
 
       {/* Featured Retreats */}
-      <section className="py-10 px-4 mx-[100px] bg-gray-50">
+      <section className="py-10 px-4 sm:px-6 lg:px-20 bg-gray-50">
         <h2 className="text-2xl font-semibold mb-6 text-center text-blue-800">Featured Retreats</h2>
         {loadingRetreats ? (
           <p className="text-center text-gray-500">Loading retreats...</p>
         ) : retreats.length === 0 ? (
           <p className="text-center text-gray-500">No retreats found.</p>
         ) : (
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {retreats.slice(0, 3).map((retreat) => (
               <div
                 key={retreat.id}
-                 className="bg-white rounded-lg shadow-lg p-4 border hover:shadow-2xl transform transition-transform hover:scale-105"
+                className="bg-white rounded-lg shadow-lg p-4 border hover:shadow-2xl transform transition-transform hover:scale-105"
                 onClick={() => openDetailModal(retreat)}
               >
                 <img
-                  src={
-                    retreat.photos.length > 0
-                      ? `${imageBaseUrl}/${retreat.photos[0].path}`
-                      : "/placeholder.jpg"
-                  }
+                  src={retreat.photos.length > 0 ? `${imageBaseUrl}/${retreat.photos[0].path}` : "/placeholder.jpg"}
                   alt={retreat.title}
                   className="w-full h-48 object-cover rounded-lg mb-2"
                 />
                 <h2 className="text-xl font-semibold text-indigo-600">{retreat.title}</h2>
                 <p className="text-md text-gray-500">{retreat.address}</p>
-                <p className="text-gray-600 mt-1">Price: ${retreat.capacity}</p>
-                <p className="text-gray-600 mt-1">Price/Person: {retreat.price_per_person} </p>
-                 <p className="text-gray-600 mt-1">Package Price: {retreat.package_price} </p>
+                <p className="text-gray-600 mt-1">Capacity: {retreat.capacity}</p>
+                <p className="text-gray-600 mt-1">Price/Person: {retreat.price_per_person}</p>
+                <p className="text-gray-600 mt-1">Package Price: {retreat.package_price}</p>
                 <div className="mt-4 space-y-2">
-                  <button
-                    onClick={() => openDetailModal(retreat)}
-                    className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
+                  <button onClick={() => openDetailModal(retreat)} className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
                     See More Details
                   </button>
-              </div>
+                </div>
               </div>
             ))}
           </div>
-          
         )}
-        
       </section>
 
-            {/* Detail & Booking modals */}
-            <Dialog open={isDetailModalOpen} onClose={closeDetailModal} className="relative z-50">
-              <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
-              <div className="fixed inset-0 flex items-center justify-center p-4 overflow-auto">
-                <Dialog.Panel className="bg-white max-w-5xl w-full rounded-xl p-6 shadow-xl">
-                  <div className="flex justify-between items-start mb-4">
-                    <Dialog.Title className="text-3xl font-bold text-indigo-700">
-                      {selectedRetreat?.title}
-                    </Dialog.Title>
-                    <button
-                      onClick={closeDetailModal}
-                      className="text-gray-500 hover:text-gray-800 text-xl"
-                    >
-                      ✕
-                    </button>
-                  </div>
-      
-                  <p className="text-gray-600 mb-4">{selectedRetreat?.address}</p>
-      
-                  {selectedRetreat?.photos?.length ? (
-                    <div className="mb-6">
-                      <div className="w-full h-96 mb-4 rounded overflow-hidden border">
-                        <img
-                          src={
-                            selectedRetreat.photos?.[selectedPhotoIndex]
-                              ? `${imageBaseUrl}/${selectedRetreat.photos[selectedPhotoIndex].path}`
-                              : '/placeholder.jpg'
-                          }
-                          alt="Main"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex flex-wrap gap-3">
-                        {selectedRetreat.photos.map((photo, index) => (
-                          <img
-                            key={photo.id}
-                            src={`${imageBaseUrl}/${photo.path}`}
-                            onClick={() => setSelectedPhotoIndex(index)}
-                            className={`w-24 h-24 object-cover rounded cursor-pointer border-2 ${index === selectedPhotoIndex
-                              ? 'border-indigo-500'
-                              : 'border-gray-200 hover:border-gray-400'
-                              }`}
-                            alt={`Thumbnail ${index + 1}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-      
-      
-                  {selectedRetreat && (
-                    <div className="mt-6">
-                      <button
-                        onClick={() => handleBookNow(selectedRetreat)}
-                        className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                      >
-                        Book Now
-                      </button>
-                    </div>
-                  )}
-                </Dialog.Panel>
-              </div>
-            </Dialog>
-      
-            {selectedRetreat && (
-              <BookingRetreat
-                isOpen={isBookingOpen}
-                onClose={closeBookingModal}
-                retreatId={selectedRetreat.id}
-                retreatTitle={selectedRetreat.title}
-              />
-            )}
+      {/* Detail & Booking modals */}
+      <Dialog open={isDetailModalOpen} onClose={closeDetailModal} className="relative z-50">
+        <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4 overflow-auto">
+          <Dialog.Panel className="bg-white max-w-5xl w-full rounded-xl p-6 shadow-xl">
+            <div className="flex justify-between items-start mb-4">
+              <Dialog.Title className="text-3xl font-bold text-indigo-700">
+                {selectedRetreat?.title}
+              </Dialog.Title>
+              <button
+                onClick={closeDetailModal}
+                className="text-gray-500 hover:text-gray-800 text-xl"
+              >
+                ✕
+              </button>
+            </div>
 
-            
-      
+            <p className="text-gray-600 mb-4">{selectedRetreat?.address}</p>
+
+            {selectedRetreat?.photos?.length ? (
+              <div className="mb-6">
+                <div className="w-full h-96 mb-4 rounded overflow-hidden border">
+                  <img
+                    src={
+                      selectedRetreat.photos?.[selectedPhotoIndex]
+                        ? `${imageBaseUrl}/${selectedRetreat.photos[selectedPhotoIndex].path}`
+                        : '/placeholder.jpg'
+                    }
+                    alt="Main"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {selectedRetreat.photos.map((photo, index) => (
+                    <img
+                      key={photo.id}
+                      src={`${imageBaseUrl}/${photo.path}`}
+                      onClick={() => setSelectedPhotoIndex(index)}
+                      className={`w-24 h-24 object-cover rounded cursor-pointer border-2 ${index === selectedPhotoIndex
+                        ? 'border-indigo-500'
+                        : 'border-gray-200 hover:border-gray-400'
+                        }`}
+                      alt={`Thumbnail ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+
+            {selectedRetreat && (
+              <div className="mt-6">
+                <button
+                  onClick={() => handleBookNow(selectedRetreat)}
+                  className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Book Now
+                </button>
+              </div>
+            )}
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+
+      {selectedRetreat && (
+        <BookingRetreat
+          isOpen={isBookingOpen}
+          onClose={closeBookingModal}
+          retreatId={selectedRetreat.id}
+          retreatTitle={selectedRetreat.title}
+        />
+      )}
+
+
+
     </>
-    
-    
-    
-    
+
+
+
+
   );
-  
-  
+
+
 }
