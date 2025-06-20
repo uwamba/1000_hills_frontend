@@ -41,7 +41,7 @@ export default function HotelForm() {
   }, []);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   });
 
   const center = {
@@ -124,7 +124,7 @@ export default function HotelForm() {
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
     >
   ) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
     if (name === "stars") {
       setFormData((prev) => ({
@@ -151,7 +151,10 @@ export default function HotelForm() {
   };
 
   const addPhotoField = () => {
-    setPhotos([...photos, new File([], "")]);
+    const placeholderFile = new File([""], "placeholder.jpg", {
+      type: "image/jpeg",
+    });
+    setPhotos([...photos, placeholderFile]);
   };
 
   const handleMapClick = (e: google.maps.MapMouseEvent) => {
@@ -162,7 +165,7 @@ export default function HotelForm() {
         ...prev,
         coordinate: { lat, lng },
       }));
-      setShowMap(false); // close the modal after selecting
+      setShowMap(false);
     }
   };
 
@@ -227,11 +230,11 @@ export default function HotelForm() {
             required
             className="contrast-input w-full p-2 border border-gray-300 rounded"
           >
-            <option value={1}>1 Star</option>
-            <option value={2}>2 Stars</option>
-            <option value={3}>3 Stars</option>
-            <option value={4}>4 Stars</option>
-            <option value={5}>5 Stars</option>
+            {[1, 2, 3, 4, 5].map((val) => (
+              <option key={val} value={val}>
+                {val} Star{val > 1 ? "s" : ""}
+              </option>
+            ))}
           </select>
         </div>
 

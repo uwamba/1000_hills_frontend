@@ -33,7 +33,7 @@ export default function DashboardHeader() {
         <span>Welcome, {username}!</span>
         <button
           onClick={handleLogout}
-          className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
+          className="bg-black-500 px-3 py-1 rounded hover:bg-black-600"
         >
           Logout
         </button>
