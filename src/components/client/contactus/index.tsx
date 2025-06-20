@@ -7,6 +7,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 export default function ContactUsComponent() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
   const [issue, setIssue] = useState("");
@@ -30,6 +31,7 @@ export default function ContactUsComponent() {
         body: JSON.stringify({
           name,
           phone,
+          email,
           address,
           description,
           issue,
@@ -45,6 +47,7 @@ export default function ContactUsComponent() {
       setSuccess("Message sent and saved successfully!");
       setName("");
       setPhone("");
+      setEmail("");
       setAddress("");
       setIssue("");
       setDescription("");
@@ -96,6 +99,17 @@ export default function ContactUsComponent() {
               className="w-full p-2 border border-gray-300 rounded"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="block text-sm font-medium mb-1">Email</label>
+            <input
+              type="email"
+              className="w-full p-2 border border-gray-300 rounded"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>

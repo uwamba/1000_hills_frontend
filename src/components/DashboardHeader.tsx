@@ -8,15 +8,23 @@ export default function DashboardHeader() {
   const router = useRouter();
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
+  const userData = localStorage.getItem("user");
 
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUsername(parsedUser.name || parsedUser.username || "User");
-    } else {
-      router.push("/signin");
-    }
-  }, []);
+
+  console.log("User Data:", userData);
+
+  if (userData) {
+    const parsedUser = JSON.parse(userData);
+    const displayName =
+      parsedUser.username && parsedUser.username.trim() !== ""
+        ? parsedUser.username
+        : parsedUser.email || "User";
+    setUsername(displayName);
+  } else {
+    router.push("/signin");
+  }
+}, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");

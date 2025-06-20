@@ -28,13 +28,24 @@ export default function SignInPage() {
 
       const data = await response.json();
 
+      console.log("Login Response:", data);
+
       if (!response.ok) {
         throw new Error(data.error || "Login failed");
       }
 
       localStorage.setItem("authToken", data.token);
+   
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("userType", userType);
+
+      if (userType === "manager") {
+      localStorage.setItem("objectManagementType", JSON.stringify(data.managed_objects));
+      localStorage.setItem("objectManagementId", data.managed_objects.id || "");
+      } else {
+      localStorage.setItem("objectManagementType","");
+      localStorage.setItem("objectManagementId", "");
+      }
 
       router.push("/dashboard");
     } catch (err: any) {
