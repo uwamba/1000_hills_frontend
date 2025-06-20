@@ -12,9 +12,8 @@ export default function Header() {
           <Link href="/roomList" className="hover:underline">Hotels Rooms</Link>
           <Link href="/busListing" className="hover:underline">Bus Tickets</Link>
           <Link href="/apartmentsListing" className="hover:underline">Apartment</Link>
-          <Link href="/" className="hover:underline">Event & Meeting</Link>
           <Link href="/contact" className="hover:underline">Contact Us</Link>
-          <Link href="/signin" className="hover:underline">Sign in</Link>
+          <Link href="/signin" className="hover:underline">Login</Link>
         </nav>
       </div>
     </header>
