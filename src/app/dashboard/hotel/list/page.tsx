@@ -147,6 +147,51 @@ export default function HotelListPage() {
 
   const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
+  const handleDownloadContract = async (hotelId: number) => {
+    console.log("Downloading contract for Hotel ID:", hotelId);
+  
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/download-contract/${hotelId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+  
+      console.log("Response status:", res.status);
+      console.log("Response content-type:", res.headers.get("content-type"));
+  
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Backend error:", errorText);
+        alert("Failed to download contract");
+        return;
+      }
+  
+      const blob = await res.blob();
+  
+      // Optional check: blob type
+      if (!blob || blob.size === 0) {
+        console.error("Empty blob received");
+        alert("Downloaded file is empty");
+        return;
+      }
+  
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `contract_${hotelId}.pdf`; // or .doc/.png etc.
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Exception while downloading contract:", err);
+      alert("Error downloading contract");
+    }
+  };
+  
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-black">
       <h1 className="text-3xl font-extrabold text-black mb-6">Hotel List</h1>
@@ -205,6 +250,12 @@ export default function HotelListPage() {
                   >
                     Delete
                   </button>
+                  <button
+                        className="bg-purple-500 text-white px-2 py-1 rounded hover:bg-purple-600"
+                        onClick={() => handleDownloadContract(hotel.id)}
+                      >
+                        Contract
+                      </button>
                 </div>
               </div>
             ))}
