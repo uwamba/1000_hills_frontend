@@ -179,7 +179,7 @@ export default function DashboardSidebar() {
           <SidebarSubItem href="/dashboard/booking/rooms" label="Rooms Booking" icon={<Calendar size={16} />} />
           <SidebarSubItem href="/dashboard/booking/apartments" label="Apartments Booking" icon={<Calendar size={16} />} />
           <SidebarSubItem href="/dashboard/booking/tickets" label="Bus Tickets Booking" icon={<Calendar size={16} />} />
-          <SidebarSubItem href="/dashboard/booking/events" label="Events Booking" icon={<Calendar size={16} />} />
+          <SidebarSubItem href="/dashboard/booking/ticket" label="Events Booking" icon={<Calendar size={16} />} />
         </SidebarGroup>
          {userType === "admin" && (
         <SidebarGroup

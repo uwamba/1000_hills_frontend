@@ -7,7 +7,7 @@ interface Client {
   names: string;
 }
 
-interface Apartment {
+interface Ticket {
   id: number;
   name: string;
   location: string;
@@ -21,19 +21,19 @@ interface Booking {
   amount_to_pay: number;
   status: string;
   client: Client;
-  apartment: Apartment;
+  ticket: Ticket;
 }
 
-const ApartmentBookingsPage = () => {
+const TicketBookingsPage = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchApartmentBookings = async () => {
+  const fetchTicketBookings = async () => {
     try {
       const authToken = localStorage.getItem('authToken');
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/apartment-bookings`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/ticket-bookings`,
         {
           headers: {
             Authorization: `Bearer ${authToken}`,
@@ -53,7 +53,7 @@ const ApartmentBookingsPage = () => {
         setBookings([]);
       }
     } catch (error) {
-      console.error('Error fetching apartment bookings:', error);
+      console.error('Error fetching ticket bookings:', error);
       setBookings([]);
     } finally {
       setLoading(false);
@@ -61,39 +61,40 @@ const ApartmentBookingsPage = () => {
   };
 
   useEffect(() => {
-    fetchApartmentBookings();
+    fetchTicketBookings();
   }, []);
 
   const handleCheckPayment = (id: number) => {
-    console.log("Check payment for booking", id);
+    console.log('Check payment for booking', id);
   };
 
   const handleApproveBooking = async (id: number) => {
-    console.log("Approving booking", id);
+    console.log('Approving booking', id);
   };
 
   const handleCancelBooking = async (id: number) => {
-    console.log("Canceling booking", id);
+    console.log('Canceling booking', id);
   };
 
   if (loading) return <div className="p-4 text-black">Loading...</div>;
 
   return (
     <div className="p-6 bg-white min-h-screen text-black">
-      <h1 className="text-3xl font-semibold mb-6">Apartment Bookings</h1>
+      <h1 className="text-3xl font-semibold mb-6">Ticket Bookings</h1>
 
       {bookings.length === 0 ? (
         <p>No bookings found.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-[900px] w-full border border-gray-300 divide-y divide-gray-200 text-sm text-black">
-            <thead className="bg-gray-100 text-black">
+            <thead className="bg-gray-100">
               <tr>
                 <th className="border px-4 py-2 text-left">From</th>
                 <th className="border px-4 py-2 text-left">To</th>
+                <th className="border px-4 py-2 text-left">Seat</th>
                 <th className="border px-4 py-2 text-left">Amount</th>
                 <th className="border px-4 py-2 text-left">Status</th>
-                <th className="border px-4 py-2 text-left">Apartment</th>
+                <th className="border px-4 py-2 text-left">Ticket</th>
                 <th className="border px-4 py-2 text-left">Location</th>
                 <th className="border px-4 py-2 text-left">Client</th>
                 <th className="border px-4 py-2 text-left min-w-[180px]">Actions</th>
@@ -101,13 +102,14 @@ const ApartmentBookingsPage = () => {
             </thead>
             <tbody>
               {bookings.map((booking) => (
-                <tr key={booking.id} className="hover:bg-gray-50 text-black">
+                <tr key={booking.id} className="hover:bg-gray-50">
                   <td className="border px-4 py-2">{booking.from_date_time}</td>
                   <td className="border px-4 py-2">{booking.to_date_time}</td>
+                  <td className="border px-4 py-2">{booking.seat}</td>
                   <td className="border px-4 py-2">${booking.amount_to_pay}</td>
                   <td className="border px-4 py-2">{booking.status}</td>
-                  <td className="border px-4 py-2">{booking.apartment?.name}</td>
-                  <td className="border px-4 py-2">{booking.apartment?.location}</td>
+                  <td className="border px-4 py-2">{booking.ticket?.name}</td>
+                  <td className="border px-4 py-2">{booking.ticket?.location}</td>
                   <td className="border px-4 py-2">{booking.client?.names}</td>
                   <td className="border px-4 py-2">
                     <div className="flex flex-nowrap gap-1">
@@ -141,4 +143,4 @@ const ApartmentBookingsPage = () => {
   );
 };
 
-export default ApartmentBookingsPage;
+export default TicketBookingsPage;
