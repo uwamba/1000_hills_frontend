@@ -35,45 +35,46 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
   const [exchangeRates, setExchangeRates] = useState<{ code: string; rate: number }[]>([
     { code: defaultCurrency, rate: 1 },
   ]);
-
-  const authToken = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+  const [bookedSeats, setBookedSeats] = useState<number[]>([]);
 
   const fetchRates = async () => {
     try {
-
-      const res = await fetch(`${apiUrl}/client/exchange-rates`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await fetch(`${apiUrl}/client/exchange-rates`);
       const data = await res.json();
       const formattedRates = Array.isArray(data)
         ? data.map((rate: any) => ({
-          code: rate.currency_code,
-          rate: parseFloat(rate.rate_to_usd),
-        }))
+            code: rate.currency_code,
+            rate: parseFloat(rate.rate_to_usd),
+          }))
         : [];
 
-      console.log("Formatted Rates:", formattedRates);
-
-      if (formattedRates.length > 0) {
-        setExchangeRates(formattedRates);
-      } else {
-        console.warn("No valid exchange rates found.");
-      }
-
-      setExchangeRates(formattedRates);
-
+      setExchangeRates(formattedRates.length > 0 ? formattedRates : exchangeRates);
     } catch (error) {
       console.error("Error fetching exchange rates:", error);
     }
   };
 
+  const fetchBookedSeats = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/booked-seats/${propertyId}`);
+      const data = await res.json();
+      console.log("Booked seats data:", data);
+      if (!Array.isArray(data)) {
+        console.error("Invalid booked seats data format:", data);
+        return;
+      }
+      const parsed = data.map((s: string | number) => parseInt(String(s)));
+
+      setBookedSeats(parsed);
+    } catch (err) {
+      console.error("Failed to fetch booked seats", err);
+    }
+  };
 
   useEffect(() => {
     fetchRates();
-  }, []);
+    fetchBookedSeats();
+  }, [propertyId, object_type]);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -131,13 +132,13 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
   };
 
   const handleSeatSelect = (seatNumber: number) => {
-    console.log("Selected seat:", seatNumber);
+    if (bookedSeats.includes(seatNumber)) {
+      alert("This seat is already booked!");
+      return;
+    }
     setFormData((prev) => ({ ...prev, seat: seatNumber.toString() }));
     setStep("form");
   };
-
- 
-
 
   const goToPaymentStep = () => {
     if (!formData.email || !formData.names || !formData.phone || !formData.country) {
@@ -194,65 +195,62 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
   };
 
   const getConvertedAmount = () => {
-  const selected = exchangeRates.find((c) => c.code === selectedCurrency);
-  const baseCurrency = currency?.currency_code ?? "USD";
-  const baseRate = parseFloat(currency?.rate_to_usd ?? "1");
+    const selected = exchangeRates.find((c) => c.code === selectedCurrency);
+    const baseRate = parseFloat(currency?.rate_to_usd ?? "1");
 
-  if (!selected) return price.toFixed(2);
+    if (!selected) return price.toFixed(2);
 
-  // Convert to USD first
-  const usdAmount = price / baseRate;
-
-  // Then convert to selected currency
-  const converted = usdAmount * selected.rate;
-  return converted.toFixed(2);
-};
-
-
-
-  // ...rest of the component remains unchanged
-
-
+    const usdAmount = price / baseRate;
+    const converted = usdAmount * selected.rate;
+    return converted.toFixed(2);
+  };
 
   const renderSeatLayout = () => {
-  const { row, seats_per_row, exclude } = seatLayout;
-  const layout = [];
-  let seatId = 1;
+    const { row, seats_per_row, exclude } = seatLayout;
+    const layout = [];
+    let seatId = 1;
 
-  for (let r = 0; r < row; r++) {
-    const rowSeats = [];
-    for (let s = 0; s < seats_per_row; s++) {
-      const currentSeatId = seatId; // capture current ID correctly
-      const isExcluded = exclude.includes(currentSeatId);
-      const isSelected = formData.seat === currentSeatId.toString();
+    for (let r = 0; r < row; r++) {
+      const rowSeats = [];
 
-      rowSeats.push(
-        <button
-          key={currentSeatId}
-          disabled={isExcluded}
-          onClick={() => handleSeatSelect(currentSeatId)}
-          className={`m-1 p-2 rounded ${
-            isExcluded
-              ? "bg-gray-300 cursor-not-allowed"
-              : isSelected
-              ? "bg-green-500 text-white"
-              : "bg-blue-500 text-white"
-          }`}
-        >
-          <FaChair />
-          <span className="block text-xs">{currentSeatId}</span>
-        </button>
+      for (let s = 0; s < seats_per_row; s++) {
+        const currentSeatId = seatId;
+        const isExcluded = exclude.includes(currentSeatId);
+        const isBooked = bookedSeats.includes(currentSeatId);
+        const isSelected = formData.seat === currentSeatId.toString();
+
+        rowSeats.push(
+          <button
+            key={currentSeatId}
+            disabled={isExcluded || isBooked}
+            onClick={() => handleSeatSelect(currentSeatId)}
+            className={`m-1 p-2 rounded ${
+              isExcluded
+                ? "bg-gray-300 cursor-not-allowed"
+                : isBooked
+                ? "bg-red-500 text-white cursor-not-allowed"
+                : isSelected
+                ? "bg-green-500 text-white"
+                : "bg-blue-500 text-white"
+            }`}
+          >
+            <FaChair />
+            <span className="block text-xs">{currentSeatId}</span>
+          </button>
+        );
+
+        seatId++;
+      }
+
+      layout.push(
+        <div key={`row-${r}`} className="flex justify-center mb-2">
+          {rowSeats}
+        </div>
       );
-      seatId++; // increment after using the currentSeatId
     }
-    layout.push(
-      <div key={`row-${r}`} className="flex justify-center mb-2">
-        {rowSeats}
-      </div>
-    );
-  }
-  return layout;
-};
+
+    return layout;
+  };
 
   return (
     <>
@@ -264,9 +262,7 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
       </button>
 
       {showModal && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center"
-        >
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex justify-center items-center">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 relative">
             <button
               onClick={closeModal}
@@ -317,7 +313,6 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
                     }}
                     className="w-full p-2 border rounded mb-3 text-black"
                   >
-                    {/* Add default option if needed */}
                     {!exchangeRates.some((c) => c.code === selectedCurrency) && (
                       <option value={defaultCurrency}>{defaultCurrency}</option>
                     )}
@@ -330,7 +325,6 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
                     Amount to Pay: {getConvertedAmount()} {selectedCurrency}
                   </div>
                 </label>
-
 
                 <label className="block">
                   <span className="text-black">Payment Method</span>

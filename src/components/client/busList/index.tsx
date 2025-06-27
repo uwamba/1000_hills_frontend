@@ -33,6 +33,7 @@ interface Journey {
   from: string;
   to: string;
   departure: string;
+  time: string;
   return: string;
   status: string | null;
   deleted_on: string | null;
@@ -195,8 +196,9 @@ export default function BusList() {
                 </div>
 
                 <div className="text-gray-600 text-sm mb-2">
-                  <strong className="text-gray-800">Departure:</strong>{' '}
-                  {new Date(journey.departure).toLocaleString()}
+                  <strong className="text-gray-800">Departure date:</strong>{' '}
+                 {new Date(journey.departure).toLocaleDateString()} {' '}
+                  {journey.time}
                 </div>
 
                 <div className="text-gray-700 text-lg mt-4 font-bold">
