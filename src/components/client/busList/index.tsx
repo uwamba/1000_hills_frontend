@@ -41,6 +41,14 @@ interface Journey {
   created_at: string;
   updated_at: string;
   price?: number;
+  currency?: {
+    currency_code: string;
+    rate_to_usd: string;
+  } | null;
+  exchangeRate?: {
+    currency_code: string;
+    rate_to_usd: string;
+  } | null;
 }
 
 interface JourneyResponse {
@@ -59,46 +67,46 @@ export default function BusList() {
 
 
   const fetchJourneys = async (pageNum: number) => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const params = new URLSearchParams();
-
-
-    if (selectedAgency) params.append('agency', selectedAgency);
-    if (departureDate) params.append('departure_date', departureDate);
-
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/client/journeys?${params.toString()}`
-    );
-
-    if (!response.ok) throw new Error('Failed to fetch journeys');
-    const json: JourneyResponse = await response.json();
-
-    const journeysWithPrice = json.data.map((j) => ({
-      ...j,
-    }));
-
-    const agencyNames = Array.from(
-      new Set(journeysWithPrice.map((j) => j.bus?.agency.name).filter(Boolean))
-    ) as string[];
-
-    setJourneys(journeysWithPrice);
-    setFilteredJourneys(journeysWithPrice);
-    setAgencies(agencyNames);
-
-  } catch (error) {
-    console.error('Error fetching journeys:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+      const params = new URLSearchParams();
 
 
+      if (selectedAgency) params.append('agency', selectedAgency);
+      if (departureDate) params.append('departure_date', departureDate);
 
-useEffect(() => {
-  fetchJourneys(1); // Reset to first page on filter change
-}, [selectedAgency, departureDate]);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/client/journeys?${params.toString()}`
+      );
+
+      if (!response.ok) throw new Error('Failed to fetch journeys');
+      const json: JourneyResponse = await response.json();
+
+      const journeysWithPrice = json.data.map((j) => ({
+        ...j,
+      }));
+
+      const agencyNames = Array.from(
+        new Set(journeysWithPrice.map((j) => j.bus?.agency.name).filter(Boolean))
+      ) as string[];
+
+      setJourneys(journeysWithPrice);
+      setFilteredJourneys(journeysWithPrice);
+      setAgencies(agencyNames);
+
+    } catch (error) {
+      console.error('Error fetching journeys:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  useEffect(() => {
+    fetchJourneys(1); // Reset to first page on filter change
+  }, [selectedAgency, departureDate]);
 
 
   return (
@@ -110,7 +118,7 @@ useEffect(() => {
         <div className="bg-white p-4 rounded-lg shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             {/* Search */}
-            
+
             {/* Agency Filter */}
             <div className="flex flex-col w-full md:w-1/4">
               <label htmlFor="agency" className="text-sm font-semibold text-gray-700 mb-1">Agency</label>
@@ -173,12 +181,13 @@ useEffect(() => {
                   <h2 className="text-xl font-semibold text-indigo-700">
                     {journey.from} ➡️ {journey.to}
                   </h2>
-                 
+
                 </div>
 
                 <div className="text-gray-600 text-sm mb-2">
                   <strong className="text-gray-800">Agency:</strong> {journey.bus?.agency.name || '—'}
                 </div>
+
 
                 <div className="text-gray-600 text-sm mb-2">
                   <strong className="text-gray-800">Bus:</strong> {journey.bus?.name || '—'} |{' '}
@@ -191,7 +200,7 @@ useEffect(() => {
                 </div>
 
                 <div className="text-gray-700 text-lg mt-4 font-bold">
-                  {journey.price?.toLocaleString()} RWF
+                  {journey.price} {journey.currency?.currency_code || 'USD'}
                 </div>
 
 
@@ -200,11 +209,16 @@ useEffect(() => {
                   <TicketBookingForm
                     propertyId={journey.id.toString()}
                     price={journey.price ?? 0}
+                    currency={{
+                      currency_code: journey.currency?.currency_code || 'USD',
+                      rate_to_usd: journey.currency?.rate_to_usd || '1'
+                    }}
+
                     object_type="ticket"
                     seatLayout={{
                       row: layout?.seat_row || 5,
                       seats_per_row: layout?.seat_column || 4,
-                      exclude: layout?.exclude||[],
+                      exclude: layout?.exclude || [],
                     }}
                   />
                 </div>
@@ -216,7 +230,7 @@ useEffect(() => {
 
       {/* Pagination */}
       <div className="mt-10 flex justify-center items-center space-x-4">
-       
+
       </div>
     </div>
   );

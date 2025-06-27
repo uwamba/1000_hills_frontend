@@ -8,6 +8,10 @@ interface Agency {
   address: string;
   description: string;
 }
+interface exchangeRate {
+  currency_code: string;
+  rate_to_usd: string;
+}
 
 interface Layout {
   id: number;
@@ -39,6 +43,13 @@ interface Journey {
   bus: Bus | null;
   created_at: string;
   updated_at: string;
+  time: string;
+  price: string;
+  currency: {
+    currency_code: string;
+    rate_to_usd: string;
+  } | null;
+  exchangeRate: exchangeRate | null;
 }
 
 interface JourneyResponse {
@@ -171,6 +182,9 @@ export default function JourneyListPage() {
                   <div className="mt-4 text-sm text-gray-700 space-y-1">
                     <p>
                       <span className="font-semibold">Bus:</span> {journey.bus.name}
+                    </p>
+                     <p>
+                      <span className="font-semibold">Price:</span> {journey.price} {journey.currency?.currency_code || 'USD'}    
                     </p>
                     <p>
                       <span className="font-semibold">Agency:</span> {journey.bus.agency.name}

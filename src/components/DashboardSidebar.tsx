@@ -33,6 +33,7 @@ export default function DashboardSidebar() {
   const [username, setUsername] = useState("");
   const [userType, setUserType] = useState("");
   const [objectManagement, setObjectManagement] = useState<string[]>([]);
+  const [openExchangeRateManagement, setOpenExchangeRateManagement] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -90,6 +91,17 @@ export default function DashboardSidebar() {
             <SidebarSubItem href="/dashboard/users/add" label="Add New User" icon={<UserPlus size={16} />} />
             <SidebarSubItem href="/dashboard/roles" label="Roles Management" icon={<Shield size={16} />} />
             <SidebarSubItem href="/dashboard/projects" label="Projects" icon={<Folder size={16} />} />
+          </SidebarGroup>
+        )}
+
+        {userType === "admin" && (
+          <SidebarGroup
+            label="Exchange Rate Management"
+            icon={<Users size={20} />}
+            open={openExchangeRateManagement}
+            toggle={() => setOpenExchangeRateManagement(!openExchangeRateManagement)}
+          >
+            <SidebarSubItem href="/dashboard/exchange" label="Currency List" icon={<List size={16} />} />
           </SidebarGroup>
         )}
 

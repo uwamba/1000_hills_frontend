@@ -7,6 +7,11 @@ type Bus = {
   name: string;
 };
 
+type Currency = {
+  currency_code: string;
+  rate_to_usd: string;
+};
+
 export default function AddJourneyPage() {
   const [formData, setFormData] = useState({
     from: '',
@@ -16,10 +21,12 @@ export default function AddJourneyPage() {
     time: '',
     bus_id: '',
     price: '',
+    currency: '',
   });
 
   const [locations, setLocations] = useState<string[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,20 +34,15 @@ export default function AddJourneyPage() {
 
     const fetchBuses = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/buses`,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Ensure you have the auth token
-            },
-          }
-        );
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/buses`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        });
         if (!res.ok) throw new Error('Failed to fetch buses');
-
         const json = await res.json();
-        const data: Bus[] = json.data || [];
-
-        setBuses(data);
+        setBuses(json.data || []);
       } catch (error) {
         console.error('Error fetching buses:', error);
       } finally {
@@ -48,7 +50,24 @@ export default function AddJourneyPage() {
       }
     };
 
+    const fetchCurrencies = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/exchange-rates`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          },
+        });
+        if (!res.ok) throw new Error('Failed to fetch currencies');
+        const json = await res.json();
+        setCurrencies(json);
+      } catch (error) {
+        console.error('Error fetching currencies:', error);
+      }
+    };
+
     fetchBuses();
+    fetchCurrencies();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -58,11 +77,12 @@ export default function AddJourneyPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const authToken = localStorage.getItem("authToken"); 
+      const authToken = localStorage.getItem('authToken');
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/journeys`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 
-          Authorization: `Bearer ${authToken}`  // Ensure you have the auth token
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify(formData),
       });
@@ -83,9 +103,8 @@ export default function AddJourneyPage() {
         onSubmit={handleSubmit}
         className="w-full max-w-3xl bg-white p-8 rounded-lg shadow-lg border border-gray-300"
       >
-        <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">
-          Add New Journey
-        </h1>
+        <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">Add New Journey</h1>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* From */}
           <div className="flex flex-col">
@@ -133,8 +152,8 @@ export default function AddJourneyPage() {
               value={formData.bus_id}
               onChange={handleChange}
               required
-              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
               disabled={loading}
+              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
             >
               <option value="">Select bus</option>
               {buses.map((bus) => (
@@ -162,7 +181,7 @@ export default function AddJourneyPage() {
           <div className="flex flex-col">
             <label className="mb-1 font-semibold text-gray-900">Departure</label>
             <input
-              type="datetime-local"
+              type="date"
               name="departure"
               value={formData.departure}
               onChange={handleChange}
@@ -175,7 +194,7 @@ export default function AddJourneyPage() {
           <div className="flex flex-col">
             <label className="mb-1 font-semibold text-gray-900">Return (optional)</label>
             <input
-              type="datetime-local"
+              type="date"
               name="return"
               value={formData.return}
               onChange={handleChange}
@@ -183,9 +202,10 @@ export default function AddJourneyPage() {
             />
           </div>
 
+
           {/* Price */}
           <div className="flex flex-col">
-            <label className="mb-1 font-semibold text-gray-900">Price (RWF)</label>
+            <label className="mb-1 font-semibold text-gray-900">Price</label>
             <input
               type="number"
               name="price"
@@ -196,6 +216,25 @@ export default function AddJourneyPage() {
               step="0.01"
               className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
             />
+          </div>
+
+          {/* Currency */}
+          <div className="flex flex-col">
+            <label className="mb-1 font-semibold text-gray-900">Currency</label>
+            <select
+              name="currency"
+              value={formData.currency}
+              onChange={handleChange}
+              required
+              className="border border-gray-500 rounded px-3 py-2 text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-600"
+            >
+              <option value="">Select currency</option>
+              {currencies.map((cur) => (
+                <option key={cur.currency_code} value={cur.currency_code}>
+                  {cur.currency_code} ({cur.rate_to_usd})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
