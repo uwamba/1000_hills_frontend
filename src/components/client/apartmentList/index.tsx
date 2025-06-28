@@ -14,6 +14,7 @@ interface Apartment {
   id: number;
   name: string;
   address: string;
+  description: string;
   number_of_bedroom: number;
   kitchen_inside: boolean;
   kitchen_outside: boolean;
@@ -244,7 +245,12 @@ export default function ApartmentList() {
                 <p className="text-sm text-gray-600">
                   <strong>Price/month:</strong> {apartment.price_per_month ? `$${apartment.price_per_month}` : 'N/A'}
                 </p>
-
+                <p className="text-sm text-gray-600">
+                  <strong>Description:</strong> {apartment.description ? `$${apartment.description}` : 'N/A'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Availability:</strong> {apartment.description ? `$${apartment.description}` : 'N/A'}
+                </p>
                 <div className="mt-4 space-y-2">
                   <button
                     onClick={() => openDetailModal(apartment)}
@@ -325,6 +331,12 @@ export default function ApartmentList() {
                   Bedrooms: {selectedApartment.number_of_bedroom}
                 </p>
                 <p className="text-gray-700 mb-2">Floors: {selectedApartment.number_of_floor}</p>
+                <p className="text-gray-700 mb-2">Price /Night: {selectedApartment.price_per_night}</p>
+
+                <p className="text-gray-700 mb-2">Price /Month: {selectedApartment.price_per_month}</p>
+                <p className="text-gray-700 mb-2">Kitchen Inside: {selectedApartment.kitchen_inside}</p>
+                <p className="text-gray-700 mb-2">Kitchen Outside: {selectedApartment.kitchen_outside}</p>
+                <p className="text-gray-700 mb-2">Description: {selectedApartment.description}</p>
 
                 <button
                   onClick={() => {
