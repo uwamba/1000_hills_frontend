@@ -8,7 +8,6 @@ interface BookingFormProps {
   propertyId: string;
   price: number;
   object_type: string;
-
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -59,14 +58,48 @@ const BookingForm: React.FC<BookingFormProps> = ({
     setStep("form");
   };
 
-  const goToPaymentStep = () => {
+  const validateFormStep = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const nameRegex = /^[A-Za-zÀ-ÿ '-]+$/;
+    const phoneRegex = /^(07\d{8}|2507\d{8})$/;
+
     if (!formData.from_date_time || !formData.to_date_time) {
-      return alert("Please select both From and To dates.");
+      alert("Please select both From and To dates.");
+      return false;
     }
-    if (!formData.email || !formData.names || !formData.phone || !formData.country) {
-      return alert("Please complete all personal details.");
+
+    if (formData.from_date_time > formData.to_date_time) {
+      alert("To date must be after From date.");
+      return false;
     }
-    setStep("payment");
+
+    if (!formData.names || !nameRegex.test(formData.names)) {
+      alert("Please enter a valid Full Name.");
+      return false;
+    }
+
+    if (!formData.country) {
+      alert("Please enter your Country.");
+      return false;
+    }
+
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      alert("Please enter a valid Email.");
+      return false;
+    }
+
+    if (!formData.phone || !phoneRegex.test(formData.phone)) {
+      alert("Please enter a valid Phone number (e.g., 078XXXXXXX or 25078XXXXXXX).");
+      return false;
+    }
+
+    return true;
+  };
+
+  const goToPaymentStep = () => {
+    if (validateFormStep()) {
+      setStep("payment");
+    }
   };
 
   const sendOtp = async () => {
@@ -76,7 +109,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       return alert("Please select a payment method.");
     }
 
-    if (payment_method === "momo") {
+    if (payment_method === "momo_rwanda") {
       const momoRegex = /^2507\d{8}$/;
       if (!momoRegex.test(momo_number)) {
         return alert("Please enter a valid MoMo phone number (format: 2507XXXXXXXX).");
@@ -248,6 +281,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
               </div>
             )}
 
+            {/* Payment Step */}
             {step === "payment" && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-black">Choose Payment Method</h2>
@@ -273,7 +307,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                       <input
                         type="number"
                         name="momo_number"
-                        placeholder="momo_number (e.g., 2507XXXXXXXX)"
+                        placeholder="e.g., 2507XXXXXXXX"
                         value={formData.momo_number}
                         onChange={(e) =>
                           handleInputChange({ name: "momo_number", value: e.target.value })
@@ -312,6 +346,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
               </div>
             )}
 
+            {/* OTP Step */}
             {step === "otp" && (
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-black">Verify OTP</h2>
@@ -333,6 +368,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
               </div>
             )}
 
+            {/* Success Step */}
             {step === "success" && (
               <div className="text-center space-y-4">
                 <h2 className="text-xl font-bold text-green-700">Booking Confirmed!</h2>
