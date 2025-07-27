@@ -19,7 +19,8 @@ interface Room {
   status: string | null;
   deleted_on: string | null;
   photos: Photo[];
-  hotel:Hotel | null;
+  hotel: Hotel | null;
+
 }
 
 interface RoomResponse {
@@ -27,12 +28,13 @@ interface RoomResponse {
   last_page: number;
   data: Room[];
 }
-interface Hotel{
+interface Hotel {
   id: number;
   name: string;
   stars: string;
 
 }
+
 
 export default function RoomListClientPage() {
   const [fromDate, setFromDate] = useState('');
@@ -80,6 +82,7 @@ export default function RoomListClientPage() {
       if (!res.ok) throw new Error('Failed to fetch rooms');
 
       const json: RoomResponse = await res.json();
+      console.log('room data', json.data);
       setRooms(json.data);
       setFilteredRooms(json.data);
       setPage(json.current_page);
@@ -210,7 +213,7 @@ export default function RoomListClientPage() {
                 <div className="mt-2 text-sm text-gray-600 space-y-1">
                   <div>
                     <span className="font-medium">Type:</span>{' '}
-                    <span className= 'text-green-600'>
+                    <span className='text-green-600'>
                       {room.type || 'N/A'}
                     </span>
                   </div>
@@ -221,6 +224,7 @@ export default function RoomListClientPage() {
                     </div>
                   )}
                 </div>
+                
               </Link>
             ))}
           </div>

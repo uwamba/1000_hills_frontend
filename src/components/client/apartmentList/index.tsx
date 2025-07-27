@@ -9,6 +9,11 @@ interface Photo {
   id: number;
   url: string;
 }
+interface Booking {
+  from: string;
+  to: string;
+}
+
 
 interface Apartment {
   id: number;
@@ -25,6 +30,7 @@ interface Apartment {
   price_per_night: number;
   price_per_month: number;
   currency?: string;
+  bookings: Booking[];
 }
 
 
@@ -75,7 +81,7 @@ export default function ApartmentList() {
   const [otp, setOtp] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  
+
   const [totalPrice, setTotalPrice] = useState(0);
 
 
@@ -97,11 +103,13 @@ export default function ApartmentList() {
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/client/apartments?${params.toString()}`
+
       );
 
       if (!res.ok) throw new Error('Failed to fetch apartments');
 
       const json: ApartmentResponse = await res.json();
+      console.log("log dada", json.data);
       setApartments(json.data);
       setPage(json.current_page);
       setLastPage(json.last_page);
@@ -117,7 +125,7 @@ export default function ApartmentList() {
 
 
 
-  
+
   const handlePrev = () => page > 1 && fetchApartments(page - 1);
   const handleNext = () => page < lastPage && fetchApartments(page + 1);
 
@@ -134,9 +142,9 @@ export default function ApartmentList() {
   };
 
   const openBookingModal = (apartment: Apartment) => {
-     setSelectedApartment(apartment);
+    setSelectedApartment(apartment);
     setPricePerDay
-    
+
     setFormData({
       name: '',
       email: '',
@@ -165,10 +173,10 @@ export default function ApartmentList() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  
-  
 
- 
+
+
+
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -248,9 +256,8 @@ export default function ApartmentList() {
                 <p className="text-sm text-gray-600">
                   <strong>Description:</strong> {apartment.description ? `$${apartment.description}` : 'N/A'}
                 </p>
-                <p className="text-sm text-gray-600">
-                  <strong>Availability:</strong> {apartment.description ? `$${apartment.description}` : 'N/A'}
-                </p>
+               
+           
                 <div className="mt-4 space-y-2">
                   <button
                     onClick={() => openDetailModal(apartment)}
@@ -337,7 +344,18 @@ export default function ApartmentList() {
                 <p className="text-gray-700 mb-2">Kitchen Inside: {selectedApartment.kitchen_inside}</p>
                 <p className="text-gray-700 mb-2">Kitchen Outside: {selectedApartment.kitchen_outside}</p>
                 <p className="text-gray-700 mb-2">Description: {selectedApartment.description}</p>
-
+                <h3 className="text-sm text-gray-600">Active Bookings:</h3>
+                <ul className="text-red-600">
+                  {Array.isArray(selectedApartment.bookings) && selectedApartment.bookings.length > 0 ? (
+                    selectedApartment.bookings.map((booking, index) => (
+                      <li key={index}>
+                        From: {booking.from?.slice(0, 10)} - To: {booking.to?.slice(0, 10)}
+                      </li>
+                    ))
+                  ) : (
+                    <li>Currently available (no bookings)</li>
+                  )}
+                </ul>
                 <button
                   onClick={() => {
                     closeDetailModal();
@@ -356,11 +374,11 @@ export default function ApartmentList() {
 
       {/* Booking Modal */}
       <BookingModal
-  isOpen={isBookingModalOpen}
-  closeModal={() => setIsBookingModalOpen(false)}
-  apartment={selectedApartment} // pass the full apartment object here
-/>
-      
+        isOpen={isBookingModalOpen}
+        closeModal={() => setIsBookingModalOpen(false)}
+        apartment={selectedApartment} // pass the full apartment object here
+      />
+
 
     </div>
   );

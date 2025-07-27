@@ -23,6 +23,11 @@ interface Photo {
   path: string;
 }
 
+interface Booking {
+  id: number;
+  from_date_time: string;
+  to_date_time: string;
+}
 interface Room {
   id: number;
   name: string;
@@ -47,17 +52,19 @@ interface Room {
   updatedBy?: User | null;
   deletedBy?: User | null;
   photos?: Photo[];
+  booked?: Booking[];
+
 }
 
 export default function RoomDetailComponent() {
-    const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
   const roomId = searchParams.get('roomId');
 
   const [room, setRoom] = useState<Room | null>(null);
   const [similarRooms, setSimilarRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
- const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
+  const imageBaseUrl = process.env.NEXT_PUBLIC_IMAGE_BASE_URL_STORAGE || 'http://localhost:3000/images';
 
   useEffect(() => {
     if (roomId) {
@@ -66,6 +73,7 @@ export default function RoomDetailComponent() {
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/client/rooms/${roomId}`);
           if (!res.ok) throw new Error('Failed to fetch room details');
           const data = await res.json();
+          console.log('booked data',data.room )
           setRoom(data.room);
           setSimilarRooms(data.similarRooms || []);
         } catch (error) {
@@ -115,11 +123,10 @@ export default function RoomDetailComponent() {
                   key={photo.id}
                   src={`${imageBaseUrl}/${photo.path}`}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`h-20 w-28 object-cover rounded-lg cursor-pointer border-2 transition ${
-                    selectedImageIndex === index
+                  className={`h-20 w-28 object-cover rounded-lg cursor-pointer border-2 transition ${selectedImageIndex === index
                       ? 'border-indigo-600 ring-2 ring-indigo-300'
                       : 'border-gray-300'
-                  }`}
+                    }`}
                   alt={`Thumbnail ${index + 1}`}
                 />
               ))}
@@ -146,6 +153,19 @@ export default function RoomDetailComponent() {
             <p><strong>Sauna & Massage:</strong> {room.has_sauna_massage ? 'Yes' : 'No'}</p>
             <p><strong>Kitchen:</strong> {room.has_kitchen ? 'Yes' : 'No'}</p>
             <p><strong>Fridge:</strong> {room.has_fridge ? 'Yes' : 'No'}</p>
+            {/* Booked Dates */}
+            {room.booked && room.booked.length > 0 && (
+              <div className="mt-2 text-sm text-red-600">
+                <div className="font-medium">Booked Dates:</div>
+                <ul className="list-disc ml-5 mt-1 space-y-1">
+                  {room.booked.map((booking) => (
+                    <li key={booking.id}>
+                      {new Date(booking.from_date_time).toLocaleDateString()} → {new Date(booking.to_date_time).toLocaleDateString()}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <p>
               <strong>Status:</strong>{' '}
               <span className={room.status === 'available' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
@@ -160,12 +180,14 @@ export default function RoomDetailComponent() {
             )}
           </div>
 
+
           {/* Booking Form */}
           <div className="mt-6">
             <BookingForm
               propertyId={room.id.toString()}
               price={room.price ?? 0}
               object_type="room"
+              booking={room.booked}
             />
           </div>
         </div>

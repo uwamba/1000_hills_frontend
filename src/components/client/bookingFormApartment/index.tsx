@@ -3,6 +3,9 @@
 "use client";
 import { Dialog } from "@headlessui/react";
 import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 
 const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -10,6 +13,13 @@ interface Photo {
   id: number;
   url: string;
 }
+interface Booking {
+  from: string;
+  to: string;
+}
+
+
+
 
 interface Apartment {
   id: number;
@@ -25,6 +35,7 @@ interface Apartment {
   price_per_night: number;
   price_per_month: number;
   currency?: string;
+  bookings?: Booking[];
 }
 
 type BookingModalProps = {
@@ -70,6 +81,18 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
     const days = getDaysBetween(start, end);
     return Math.ceil(days / 30);
   };
+  const unavailableDates = (apartment?.bookings || []).flatMap((booking: any) => {
+    const start = new Date(booking.from);
+    const end = new Date(booking.to);
+    const dates = [];
+    let current = new Date(start);
+    while (current <= end) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  });
+
 
   useEffect(() => {
     if (!apartment) return;
@@ -233,14 +256,51 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
               </label>
               <label className="block">
                 <span className="text-black">From</span>
-                <input type="date" name="from_date_time" value={formData.from_date_time} onChange={handleInputChange} className="w-full p-2 border rounded text-black" />
-                {errors.from_date_time && <p className="text-red-500 text-sm">{errors.from_date_time}</p>}
+                <DatePicker
+                  selected={formData.from_date_time ? new Date(formData.from_date_time) : null}
+                  onChange={(date: Date | null) => {
+                    if (date) {
+                      handleInputChange({
+                        name: "from_date_time",
+                        value: date.toISOString().split("T")[0],
+                      });
+                    }
+                  }}
+                  excludeDates={unavailableDates}
+                  minDate={new Date()}
+                  className="w-full p-2 border rounded text-black"
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select start date"
+                />
+                {errors.from_date_time && (
+                  <p className="text-red-500 text-sm">{errors.from_date_time}</p>
+                )}
               </label>
+
               <label className="block">
                 <span className="text-black">To</span>
-                <input type="date" name="to_date_time" value={formData.to_date_time} onChange={handleInputChange} className="w-full p-2 border rounded text-black" />
-                {errors.to_date_time && <p className="text-red-500 text-sm">{errors.to_date_time}</p>}
+                <DatePicker
+                  selected={formData.to_date_time ? new Date(formData.to_date_time) : null}
+                  onChange={(date: Date | null) => {
+                    if (date) {
+                      handleInputChange({
+                        name: "to_date_time",
+                        value: date.toISOString().split("T")[0],
+                      });
+                    }
+                  }}
+                  excludeDates={unavailableDates}
+                  minDate={formData.from_date_time ? new Date(formData.from_date_time) : new Date()}
+                  className="w-full p-2 border rounded text-black"
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select end date"
+                />
+                {errors.to_date_time && (
+                  <p className="text-red-500 text-sm">{errors.to_date_time}</p>
+                )}
               </label>
+
+
               {selectedDuration && <div className="text-sm text-gray-700">Duration: <strong>{selectedDuration}</strong></div>}
               <div className="text-black font-semibold">Total Price: {totalPrice.toLocaleString()} $</div>
               <div className="flex justify-between">
