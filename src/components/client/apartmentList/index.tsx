@@ -344,7 +344,7 @@ export default function ApartmentList() {
                 <p className="text-gray-700 mb-2">Kitchen Inside: {selectedApartment.kitchen_inside}</p>
                 <p className="text-gray-700 mb-2">Kitchen Outside: {selectedApartment.kitchen_outside}</p>
                 <p className="text-gray-700 mb-2">Description: {selectedApartment.description}</p>
-                <h3 className="text-sm text-gray-600">Active Bookings:</h3>
+                <h3 className="text-sm text-gray-600">Unavailable Dates:</h3>
                 <ul className="text-red-600">
                   {Array.isArray(selectedApartment.bookings) && selectedApartment.bookings.length > 0 ? (
                     selectedApartment.bookings.map((booking, index) => (

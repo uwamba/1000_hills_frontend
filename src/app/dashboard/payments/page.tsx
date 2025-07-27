@@ -53,39 +53,38 @@ const PaymentsPage = () => {
   };
 
   const handleCheckStatus = async (paymentId: number) => {
-  try {
-    const authToken = localStorage.getItem("authToken");
-    if (!authToken) {
-      alert("Not authenticated");
-      return;
+    try {
+      const authToken = localStorage.getItem('authToken');
+      if (!authToken) {
+        alert('Not authenticated');
+        return;
+      }
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/payments/${paymentId}/status`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        console.error('Failed to check status');
+        alert('Failed to check status');
+        return;
+      }
+
+      const result = await res.json();
+      console.log('Payment status response:', result);
+
+      if (result.success && result.data) {
+        alert(`Status: ${result.data.status}\nAmount: ${result.data.amount}`);
+      } else {
+        alert(`Status check failed: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error checking status:', error);
+      alert('An error occurred while checking status.');
     }
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/payments/${paymentId}/status`, {
-      headers: {
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
-
-    if (!res.ok) {
-      console.error("Failed to check status");
-      alert("Failed to check status");
-      return;
-    }
-
-    const result = await res.json();
-    console.log("Payment status response:", result);
-
-    if (result.success && result.data) {
-      alert(`Status: ${result.data.status}\nAmount: ${result.data.amount}`);
-    } else {
-      alert(`Status check failed: ${result.message}`);
-    }
-  } catch (error) {
-    console.error("Error checking status:", error);
-    alert("An error occurred while checking status.");
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchPayments();
@@ -100,51 +99,52 @@ const PaymentsPage = () => {
       ) : payments.length === 0 ? (
         <p className="text-gray-500">No payments found.</p>
       ) : (
-        <div className="space-y-4">
-          {payments.map((payment) => (
-            <div
-              key={payment.id}
-              className="bg-gray-50 border border-gray-200 rounded-lg p-5 shadow-md"
-            >
-              <p className="text-sm text-gray-600 mb-1">
-                <span className="font-medium text-gray-800">Transaction:</span>{' '}
-                {payment.transaction_id}
-              </p>
-              <p className="text-sm text-gray-600 mb-1">
-                <span className="font-medium text-gray-800">Amount:</span> ${payment.amount_paid}
-              </p>
-              <p className="text-sm text-gray-600 mb-1">
-                <span className="font-medium text-gray-800">Account:</span> {payment.account}
-              </p>
-              <p className="text-sm text-gray-600 mb-1">
-                <span className="font-medium text-gray-800">Type:</span> {payment.type}
-              </p>
-              <p className="text-sm text-gray-600 mb-1">
-                <span className="font-medium text-gray-800">Status:</span>{' '}
-                <span
-                  className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
-                    payment.status === 'success'
-                      ? 'bg-green-100 text-green-700'
-                      : payment.status === 'pending'
-                      ? 'bg-yellow-100 text-yellow-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {payment.status}
-                </span>
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
-                <span className="font-medium text-gray-800">Client:</span> {payment.client?.name}
-              </p>
-
-              <button
-                onClick={() => handleCheckStatus(payment.id)}
-                className="mt-2 inline-block bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded"
-              >
-                Check Status
-              </button>
-            </div>
-          ))}
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto border border-gray-200">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Transaction</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Amount</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Account</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Type</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Client</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payments.map((payment) => (
+                <tr key={payment.id} className="border-t border-gray-200">
+                  <td className="px-4 py-2 text-sm text-gray-700">{payment.transaction_id}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">${payment.amount_paid}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{payment.account}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{payment.type}</td>
+                  <td className="px-4 py-2 text-sm">
+                    <span
+                      className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
+                        payment.status === 'success'
+                          ? 'bg-green-100 text-green-700'
+                          : payment.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {payment.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{payment.client?.name ?? '-'}</td>
+                  <td className="px-4 py-2 text-sm">
+                    <button
+                      onClick={() => handleCheckStatus(payment.id)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded"
+                    >
+                      Check Status
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

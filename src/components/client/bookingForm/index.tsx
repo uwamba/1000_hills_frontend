@@ -318,11 +318,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   />
                 </label>
 
-
+               
 
                 <div className="text-black font-medium">
-                  Price per day: {price} <br />
-                  Total Price: <span className="font-bold">{calculatedPrice}</span>
+                  Price per day: ${price} <br />
+                  Total Price: $<span className="font-bold">{calculatedPrice}</span>
                 </div>
 
                 <input

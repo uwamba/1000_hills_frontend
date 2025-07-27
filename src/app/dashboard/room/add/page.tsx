@@ -234,20 +234,6 @@ export default function RoomForm() {
           </select>
         </div>
 
-        {/* Bed Size */}
-        <div>
-          <label className="block text-sm font-medium text-gray-800">
-            Bed Size
-          </label>
-          <input
-            type="text"
-            name="bed_size"
-            value={formData.bed_size}
-            onChange={handleChange}
-            className="w-full p-2 mt-1 border border-gray-400 rounded text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
 
         {/* Price */}
         <div>

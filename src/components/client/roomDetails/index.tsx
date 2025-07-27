@@ -166,12 +166,7 @@ export default function RoomDetailComponent() {
                 </ul>
               </div>
             )}
-            <p>
-              <strong>Status:</strong>{' '}
-              <span className={room.status === 'available' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-                {room.status || 'N/A'}
-              </span>
-            </p>
+        
             {room.hotel && <p><strong>Hotel:</strong> {room.hotel.name}</p>}
             {room.updatedBy && <p><strong>Updated by:</strong> {room.updatedBy.name}</p>}
             {room.deletedBy && <p><strong>Deleted by:</strong> {room.deletedBy.name}</p>}
@@ -206,7 +201,7 @@ export default function RoomDetailComponent() {
                   className="w-full h-48 object-cover rounded"
                 />
                 <h3 className="text-lg font-semibold text-indigo-700 mt-4">{similarRoom.name}</h3>
-                <p className="text-gray-700">Price: {similarRoom.price} {similarRoom.currency}</p>
+                <p className="text-gray-700">Price: $ {similarRoom.price} {similarRoom.currency}</p>
                 <button className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
                   View Details
                 </button>

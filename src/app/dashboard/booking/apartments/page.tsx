@@ -27,6 +27,8 @@ interface Booking {
 const ApartmentBookingsPage = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const fetchApartmentBookings = async () => {
     try {
@@ -76,20 +78,61 @@ const ApartmentBookingsPage = () => {
     console.log("Canceling booking", id);
   };
 
+  // Filter by apartment name
+  const filteredBookings = bookings.filter((booking) =>
+    booking.apartment?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Sort filtered bookings by from_date_time according to sortOrder
+  const sortedBookings = filteredBookings.sort((a, b) => {
+    const dateA = new Date(a.from_date_time).getTime();
+    const dateB = new Date(b.from_date_time).getTime();
+    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+  });
+
+  // Toggle sort order between asc and desc
+  const toggleSortOrder = () => {
+    setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  };
+
   if (loading) return <div className="p-4 text-black">Loading...</div>;
 
   return (
     <div className="p-6 bg-white min-h-screen text-black">
       <h1 className="text-3xl font-semibold mb-6">Apartment Bookings</h1>
 
-      {bookings.length === 0 ? (
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <input
+          type="text"
+          placeholder="Search by apartment name..."
+          className="border border-gray-300 rounded px-4 py-2 w-full max-w-sm"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        <button
+          onClick={toggleSortOrder}
+          className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded"
+          title="Toggle Sort by From Date"
+        >
+          Sort by From Date: {sortOrder === 'asc' ? 'Ascending ↑' : 'Descending ↓'}
+        </button>
+      </div>
+
+      {sortedBookings.length === 0 ? (
         <p>No bookings found.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-[900px] w-full border border-gray-300 divide-y divide-gray-200 text-sm text-black">
             <thead className="bg-gray-100 text-black">
               <tr>
-                <th className="border px-4 py-2 text-left">From</th>
+                <th
+                  className="border px-4 py-2 text-left cursor-pointer"
+                  onClick={toggleSortOrder}
+                  title="Click to toggle sort order"
+                >
+                  From {sortOrder === 'asc' ? '↑' : '↓'}
+                </th>
                 <th className="border px-4 py-2 text-left">To</th>
                 <th className="border px-4 py-2 text-left">Amount</th>
                 <th className="border px-4 py-2 text-left">Status</th>
@@ -100,7 +143,7 @@ const ApartmentBookingsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {bookings.map((booking) => (
+              {sortedBookings.map((booking) => (
                 <tr key={booking.id} className="hover:bg-gray-50 text-black">
                   <td className="border px-4 py-2">{booking.from_date_time}</td>
                   <td className="border px-4 py-2">{booking.to_date_time}</td>
