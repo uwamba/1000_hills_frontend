@@ -43,9 +43,9 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
       const data = await res.json();
       const formattedRates = Array.isArray(data)
         ? data.map((rate: any) => ({
-            code: rate.currency_code,
-            rate: parseFloat(rate.rate_to_usd),
-          }))
+          code: rate.currency_code,
+          rate: parseFloat(rate.rate_to_usd),
+        }))
         : [];
 
       setExchangeRates(formattedRates.length > 0 ? formattedRates : exchangeRates);
@@ -147,35 +147,11 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
     setStep("payment");
   };
 
-  const sendOtp = async () => {
-    setIsSending(true);
-    try {
-      const res = await fetch(`${apiUrl}/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: formData.email }),
-      });
-      if (!res.ok) throw new Error("Failed to send OTP");
-      setStep("otp");
-    } catch (err) {
-      alert("Error sending OTP");
-      console.error(err);
-    } finally {
-      setIsSending(false);
-    }
-  };
+
 
   const verifyOtp = async () => {
     setIsVerifying(true);
     try {
-      const res = await fetch(`${apiUrl}/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: formData.email, otp }),
-      });
-      if (!res.ok) throw new Error("Invalid OTP");
 
       const bookingRes = await fetch(`${apiUrl}/booking/ticket`, {
         method: "POST",
@@ -183,6 +159,14 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
         credentials: "include",
         body: JSON.stringify(formData),
       });
+
+      const data = await bookingRes.json();
+      console.log("Booking response:", data);
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
+        return; // stop execution after redirect
+      }
+
       if (!bookingRes.ok) throw new Error("Booking failed");
 
       setStep("success");
@@ -224,15 +208,14 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
             key={currentSeatId}
             disabled={isExcluded || isBooked}
             onClick={() => handleSeatSelect(currentSeatId)}
-            className={`m-1 p-2 rounded ${
-              isExcluded
-                ? "bg-gray-300 cursor-not-allowed"
-                : isBooked
+            className={`m-1 p-2 rounded ${isExcluded
+              ? "bg-gray-300 cursor-not-allowed"
+              : isBooked
                 ? "bg-red-500 text-white cursor-not-allowed"
                 : isSelected
-                ? "bg-green-500 text-white"
-                : "bg-blue-500 text-white"
-            }`}
+                  ? "bg-green-500 text-white"
+                  : "bg-blue-500 text-white"
+              }`}
           >
             <FaChair />
             <span className="block text-xs">{currentSeatId}</span>
@@ -306,10 +289,14 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
                     onChange={(e) => {
                       const code = e.target.value;
                       setSelectedCurrency(code);
-                      const rate = exchangeRates.find(c => c.code === code)?.rate ?? 1;
-                      const newAmount = (price * rate).toFixed(2);
+
+                      const selectedRate = exchangeRates.find((c) => c.code === code)?.rate ?? 1;
+                      const baseRate = parseFloat(currency?.rate_to_usd ?? "1");
+                      const usdAmount = price / baseRate;
+                      const newAmount = (usdAmount * selectedRate).toFixed(2);
+
                       handleInputChange({ name: "amount_to_pay", value: newAmount });
-                      handleInputChange({ name: "currency", value: code });
+                      handleInputChange({ name: "currency_code", value: code }); // <-- FIXED
                     }}
                     className="w-full p-2 border rounded mb-3 text-black"
                   >
@@ -330,7 +317,6 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
                   <span className="text-black">Payment Method</span>
                   <select name="payment_method" value={formData.payment_method} onChange={handleInputChange} className="w-full p-2 border rounded mt-1 text-black">
                     <option value="">-- Select Payment Method --</option>
-                    <option value="momo_rwanda">MOMO (MTN Rwanda)</option>
                     <option value="flutterwave">Flutterwave (MOMO, Airtel, Card, Bank Transfer)</option>
                   </select>
                 </label>
@@ -360,8 +346,8 @@ const TicketBookingForm: React.FC<BookingFormProps> = ({
 
                 <div className="flex justify-between">
                   <button onClick={() => setStep("form")} className="px-4 py-2 bg-gray-300 text-black rounded">Back</button>
-                  <button type="button" onClick={sendOtp} disabled={isSending} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    {isSending ? "Sending OTP..." : "Continue"}
+                  <button type="button" onClick={verifyOtp} disabled={isSending} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    {isSending ? "Sending data..." : "Continue To Payment"}
                   </button>
                 </div>
               </div>
