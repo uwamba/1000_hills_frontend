@@ -376,7 +376,7 @@ export default function ApartmentList() {
       <BookingModal
         isOpen={isBookingModalOpen}
         closeModal={() => setIsBookingModalOpen(false)}
-        apartment={selectedApartment} // pass the full apartment object here
+        apartment={selectedApartment}
       />
 
 

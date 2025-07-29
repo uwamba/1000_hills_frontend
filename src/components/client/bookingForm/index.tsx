@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useRouter } from "next/navigation";
 
 const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -16,6 +17,10 @@ interface Booking {
 interface BookingFormProps {
   propertyId: string;
   price: number;
+  currency?: {
+    currency_code: string;
+    rate_to_usd: string;
+  } | null;
   object_type: string;
   booking?: Booking[];
 }
@@ -23,9 +28,20 @@ interface BookingFormProps {
 const BookingForm: React.FC<BookingFormProps> = ({
   propertyId,
   price,
+  currency,
   object_type,
   booking = [],
 }) => {
+
+    const defaultCurrency = currency?.currency_code ?? "USD";
+    const defaultRate = parseFloat(currency?.rate_to_usd ?? "1");
+    const numericPrice = typeof price === "string" ? parseFloat(price) : price;
+  
+    const [selectedCurrency, setSelectedCurrency] = useState(defaultCurrency);
+    const [exchangeRates, setExchangeRates] = useState<{ code: string; rate: number }[]>([
+      { code: defaultCurrency, rate: 1 },
+    ]);
+    const router = useRouter();
   // Initial form state depends on props, so define inside component
   const initialFormState = {
     from_date_time: new Date().toISOString().split("T")[0] + "T00:00",
@@ -34,6 +50,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     names: "",
     country: "",
     phone: "",
+    currency_code: selectedCurrency,
     object_type,
     object_id: propertyId,
     amount_to_pay: price.toString(),
@@ -42,6 +59,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
     extra_note: "",
     momo_number: "",
   };
+
+
   const excludedDateRanges = booking.map((b) => ({
     start: new Date(b.from_date_time.split("T")[0]),
     end: new Date(b.to_date_time.split("T")[0]),
@@ -67,7 +86,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
       phone: "",
       object_type,
       object_id: propertyId,
-      amount_to_pay: price.toString(),
+      amount_to_pay: (numericPrice * 1).toFixed(2),
+      currency_code: selectedCurrency,
       status: "",
       payment_method: "",
       extra_note: "",
@@ -77,6 +97,24 @@ const BookingForm: React.FC<BookingFormProps> = ({
     setStep("form");
     setOtp("");
   }, [propertyId, object_type, price]);
+
+
+  const fetchRates = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/client/exchange-rates`);
+      const data = await res.json();
+      const formattedRates = Array.isArray(data)
+        ? data.map((rate: any) => ({
+          code: rate.currency_code,
+          rate: parseFloat(rate.rate_to_usd),
+        }))
+        : [];
+
+      setExchangeRates(formattedRates.length > 0 ? formattedRates : exchangeRates);
+    } catch (error) {
+      console.error("Error fetching exchange rates:", error);
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement> | { name: string; value: string }
@@ -92,8 +130,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
   const closeModal = () => {
     setShowModal(false);
+
     setOtp("");
+    router.push("/");
   };
+
+  useEffect(() => {
+      fetchRates();
+    }, []);
 
   const validateFormStep = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -149,6 +193,16 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
 
     return true;
+  };
+  const getConvertedAmount = () => {
+    const selected = exchangeRates.find((c) => c.code === selectedCurrency);
+    const baseRate = parseFloat(currency?.rate_to_usd ?? "1");
+
+    if (!selected) return price.toFixed(2);
+
+    const usdAmount = price / baseRate;
+    const converted = usdAmount * selected.rate;
+    return converted.toFixed(2);
   };
 
   const goToPaymentStep = () => {
@@ -222,6 +276,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         credentials: "include",
         body: JSON.stringify(formData),
       });
+      console.log("Booking payload:", formData);
       if (!bookingRes.ok) throw new Error("Booking failed");
       console.log("Booking successful", formData);
 
@@ -274,7 +329,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   </div>
                 )}
 
-                <h2 className="text-2xl font-bold text-black">Booking Detailsss</h2>
+                <h2 className="text-2xl font-bold text-black">Booking Details</h2>
 
                 <label className="block">
                   <span className="text-black">From</span>
@@ -372,6 +427,37 @@ const BookingForm: React.FC<BookingFormProps> = ({
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold text-black">Choose Payment Method</h2>
 
+                 <label className="block">
+                  <span className="text-black">Select Currency</span>
+                  <select
+                    value={selectedCurrency}
+                    onChange={(e) => {
+                      const code = e.target.value;
+                      setSelectedCurrency(code);
+
+                      const selectedRate = exchangeRates.find((c) => c.code === code)?.rate ?? 1;
+                      const baseRate = parseFloat(currency?.rate_to_usd ?? "1");
+                      const usdAmount = price / baseRate;
+                      const newAmount = (usdAmount * selectedRate).toFixed(2);
+
+                      handleInputChange({ name: "amount_to_pay", value: newAmount });
+                      handleInputChange({ name: "currency_code", value: code }); // <-- FIXED
+                    }}
+                    className="w-full p-2 border rounded mb-3 text-black"
+                  >
+                    {!exchangeRates.some((c) => c.code === selectedCurrency) && (
+                      <option value={defaultCurrency}>{defaultCurrency}</option>
+                    )}
+                    {exchangeRates.map((c) => (
+                      <option key={c.code} value={c.code}>{c.code}</option>
+                    ))}
+                  </select>
+
+                  <div className="text-lg font-bold text-black mb-2">
+                    Amount to Pay: {getConvertedAmount()} {selectedCurrency}
+                  </div>
+                </label>
+
                 <label className="block">
                   <span className="text-black">Payment Method</span>
                   <select
@@ -381,7 +467,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
                     className="w-full p-2 border rounded mt-1 text-black"
                   >
                     <option value="">-- Select Payment Method --</option>
-                    <option value="momo_rwanda">MOMO (MTN Rwanda)</option>
                     <option value="flutterwave">Flutterwave (MOMO, Airtel, Card, Bank Transfer)</option>
                   </select>
                 </label>
