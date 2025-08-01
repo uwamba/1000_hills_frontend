@@ -42,9 +42,13 @@ type BookingModalProps = {
   isOpen: boolean;
   closeModal: () => void;
   apartment: Apartment | null;
+  currency?: {
+    currency_code: string;
+    rate_to_usd: string;
+  };
 };
 
-export default function BookingModal({ isOpen, closeModal, apartment }: BookingModalProps) {
+export default function BookingModal({ isOpen, closeModal, apartment, currency }: BookingModalProps) {
   const [step, setStep] = useState("form");
   const [totalPrice, setTotalPrice] = useState(0);
   const [selectedDuration, setSelectedDuration] = useState("");
@@ -52,6 +56,15 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const defaultCurrency = currency?.currency_code ?? "USD";
+  const baseRate = parseFloat(currency?.rate_to_usd ?? "1");
+  const [totalPriceInAllCurrencies, setTotalPriceInAllCurrencies] = useState<{ code: string; price: number }[]>([
+    { code: defaultCurrency, price: totalPrice },
+  ]);
+  const [selectedCurrency, setSelectedCurrency] = useState(defaultCurrency);
+  const [exchangeRates, setExchangeRates] = useState<{ code: string; rate: number }[]>([
+    { code: defaultCurrency, rate: 1 },
+  ]);
 
   const [formData, setFormData] = useState({
     pricing_method: "daily",
@@ -68,7 +81,9 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
     object_id: apartment ? apartment.id.toString() : "",
     booking_status: "pending",
     amount_to_pay: 0,
+    currency_code: "USD", // default
   });
+
 
   const getDaysBetween = (start: string, end: string): number => {
     const from = new Date(start);
@@ -93,6 +108,27 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
     return dates;
   });
 
+  useEffect(() => {
+    const fetchRates = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/client/exchange-rates`);
+        const data = await res.json();
+        const formattedRates = Array.isArray(data)
+          ? data.map((rate: any) => ({
+            code: rate.currency_code,
+            rate: parseFloat(rate.rate_to_usd),
+          }))
+          : [];
+
+        setExchangeRates(formattedRates.length > 0 ? formattedRates : exchangeRates);
+      } catch (err) {
+        console.error("Failed to fetch exchange rates", err);
+      }
+    };
+
+    fetchRates();
+  }, []);
+
 
   useEffect(() => {
     if (!apartment) return;
@@ -102,6 +138,18 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
       const days = getDaysBetween(from_date_time, to_date_time);
       if (pricing_method === "daily") {
         setTotalPrice(days * apartment.price_per_night);
+        console.log("rate", exchangeRates);
+        const basePrice = days * apartment.price_per_night;
+
+        const allPrices = exchangeRates.map((rate) => ({
+          code: rate.code,
+          price: basePrice * rate.rate,
+        }));
+
+        console.log("All Prices in all currencies:", allPrices);
+        setTotalPriceInAllCurrencies(allPrices);
+        setTotalPrice(basePrice); // still store base USD
+
         setSelectedDuration(`${days} day${days !== 1 ? "s" : ""}`);
       } else if (pricing_method === "monthly") {
         if (days < 30) {
@@ -218,6 +266,7 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+
   const days = getDaysBetween(formData.from_date_time, formData.to_date_time);
   const canContinueForm =
     formData.names &&
@@ -262,7 +311,7 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
                     if (date) {
                       handleInputChange({
                         name: "from_date_time",
-                        value: date.toISOString().split("T")[0],
+                        value:date.toLocaleDateString("en-CA"),
                       });
                     }
                   }}
@@ -285,7 +334,7 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
                     if (date) {
                       handleInputChange({
                         name: "to_date_time",
-                        value: date.toISOString().split("T")[0],
+                        value: date.toLocaleDateString("en-CA"),
                       });
                     }
                   }}
@@ -302,7 +351,44 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
 
 
               {selectedDuration && <div className="text-sm text-gray-700">Duration: <strong>{selectedDuration}</strong></div>}
-              <div className="text-black font-semibold">Total Price: {totalPrice.toLocaleString()} $</div>
+              <div className="text-black font-semibold">
+                Total Price:
+                <ul className="list-disc list-inside ml-2">
+                  {totalPriceInAllCurrencies.map((item) => (
+                    <li key={item.code}>
+                      {item.price.toLocaleString()} {item.code}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <label className="block mt-3 text-black">
+                Select Currency:
+                <select
+                  value={formData.currency_code}
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    setFormData((prev) => {
+                      const selectedPrice =
+                        totalPriceInAllCurrencies.find((c) => c.code === selected)?.price ?? prev.amount_to_pay;
+
+                      return {
+                        ...prev,
+                        currency_code: selected,
+                        amount_to_pay: selectedPrice,
+                      };
+                    });
+                  }}
+                  className="block w-full p-2 border border-gray-300 rounded mt-1"
+                >
+                  {totalPriceInAllCurrencies.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+
               <div className="flex justify-between">
                 <button onClick={closeModal} className="px-4 py-2 bg-gray-300 text-black rounded">Cancel</button>
                 <button onClick={() => validateForm() && setStep("payment")} disabled={!canContinueForm} className={`px-4 py-2 rounded text-white ${!canContinueForm ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}>Continue to Payment</button>
@@ -317,7 +403,6 @@ export default function BookingModal({ isOpen, closeModal, apartment }: BookingM
                 <span className="text-black">Payment Method</span>
                 <select name="payment_method" value={formData.payment_method} onChange={handleInputChange} className="w-full p-2 border rounded mt-1 text-black">
                   <option value="">-- Select Payment Method --</option>
-                  <option value="momo_rwanda">MOMO (MTN Rwanda)</option>
                   <option value="flutterwave">Flutterwave (MOMO, Airtel, Card, Bank Transfer)</option>
                 </select>
               </label>

@@ -339,7 +339,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                       if (date) {
                         handleInputChange({
                           name: "from_date_time",
-                          value: date.toISOString().split("T")[0] + "T00:00",
+                          value: date.toLocaleDateString("en-CA"),
                         });
                       }
                     }}
@@ -359,7 +359,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                       if (date) {
                         handleInputChange({
                           name: "to_date_time",
-                          value: date.toISOString().split("T")[0] + "T00:00",
+                          value: date.toLocaleDateString("en-CA"),
                         });
                       }
                     }}

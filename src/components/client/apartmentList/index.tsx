@@ -141,8 +141,11 @@ export default function ApartmentList() {
     setIsDetailModalOpen(false);
   };
 
-  const openBookingModal = (apartment: Apartment) => {
+  const openBookingModal = ( apartment: Apartment,
+  price_per_night: number,
+  price_per_month: number) => {
     setSelectedApartment(apartment);
+
     setPricePerDay
 
     setFormData({
@@ -267,7 +270,7 @@ export default function ApartmentList() {
                   </button>
 
                   <button
-                    onClick={() => openBookingModal(apartment)}
+                    onClick={() => openBookingModal(apartment,apartment.price_per_night,apartment.price_per_month)}
                     className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                   >
                     Book Now
@@ -359,7 +362,8 @@ export default function ApartmentList() {
                 <button
                   onClick={() => {
                     closeDetailModal();
-                    openBookingModal(selectedApartment);
+                    openBookingModal(selectedApartment,selectedApartment.price_per_night,selectedApartment.price_per_month);
+                    // Pass the price per night and month to the booking modal);
                     selectedApartment.id
                   }}
                   className="mt-4 w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
