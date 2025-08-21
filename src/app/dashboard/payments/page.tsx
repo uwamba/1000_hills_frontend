@@ -17,6 +17,7 @@ type Payment = {
   type: string;
   status: string;
   created_at: string;
+  currency_code: string;
   client?: Client;
 };
 
@@ -29,22 +30,31 @@ const PaymentsPage = () => {
       setLoading(true);
       const token = localStorage.getItem('authToken');
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/payments`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) throw new Error('Failed to fetch payments');
 
       const data = await res.json();
+      console.log("Fetched payments:", data);
 
+      // Normalize currency_code
+      const normalize = (p: any) => ({
+        ...p,
+        currency_code: p.currency_code ?? 'USD',
+      });
+
+      let paymentsArray: Payment[] = [];
       if (Array.isArray(data)) {
-        setPayments(data);
+        paymentsArray = data.map(normalize);
       } else if (data && Array.isArray(data.data)) {
-        setPayments(data.data);
-      } else {
-        setPayments([]);
+        paymentsArray = data.data.map(normalize);
       }
+
+      // Sort by created_at descending (most recent first)
+      paymentsArray.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setPayments(paymentsArray);
     } catch (error) {
       console.error('Error fetching payments:', error);
     } finally {
@@ -61,9 +71,7 @@ const PaymentsPage = () => {
       }
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/payments/${paymentId}/status`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
+        headers: { Authorization: `Bearer ${authToken}` },
       });
 
       if (!res.ok) {
@@ -76,7 +84,7 @@ const PaymentsPage = () => {
       console.log('Payment status response:', result);
 
       if (result.success && result.data) {
-        alert(`Status: ${result.data.status}\nAmount: ${result.data.amount}`);
+        alert(`Status: ${result.data.status}\nAmount: ${result.data.amount} ${result.data.currency_code}`);
       } else {
         alert(`Status check failed: ${result.message}`);
       }
@@ -105,6 +113,7 @@ const PaymentsPage = () => {
               <tr>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Transaction</th>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Amount</th>
+                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Currency</th>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Account</th>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Type</th>
                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
@@ -116,7 +125,8 @@ const PaymentsPage = () => {
               {payments.map((payment) => (
                 <tr key={payment.id} className="border-t border-gray-200">
                   <td className="px-4 py-2 text-sm text-gray-700">{payment.transaction_id}</td>
-                  <td className="px-4 py-2 text-sm text-gray-700">${payment.amount_paid}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{payment.amount_paid.toLocaleString()}</td>
+                  <td className="px-4 py-2 text-sm text-gray-700">{payment.currency_code}</td>
                   <td className="px-4 py-2 text-sm text-gray-700">{payment.account}</td>
                   <td className="px-4 py-2 text-sm text-gray-700">{payment.type}</td>
                   <td className="px-4 py-2 text-sm">
