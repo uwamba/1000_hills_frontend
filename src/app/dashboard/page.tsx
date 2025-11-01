@@ -13,6 +13,7 @@ export default function DashboardHome() {
     async function fetchStats() {
       try {
         const token = localStorage.getItem('authToken');
+        const adminData=localStorage.getItem('objectManagementType')
         if (!token) {
           console.error("No auth token found");
           return;
