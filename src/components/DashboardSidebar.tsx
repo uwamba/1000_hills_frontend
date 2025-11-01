@@ -32,13 +32,14 @@ export default function DashboardSidebar() {
   const [openPayment, setOpenPayment] = useState(false);
   const [username, setUsername] = useState("");
   const [userType, setUserType] = useState("");
-  const [objectManagement, setObjectManagement] = useState<string[]>([]);
+  const [objectName, setObjectName] = useState<string>("");
   const [openExchangeRateManagement, setOpenExchangeRateManagement] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
     const storedUserType = localStorage.getItem("userType");
     const storedObjectManagement = localStorage.getItem("objectManagementType");
+  
 
     setUserType(storedUserType || "guest");
 
@@ -46,8 +47,10 @@ export default function DashboardSidebar() {
       try {
         const parsed = JSON.parse(storedObjectManagement);
         console.log("Parsed objectManagementType:", parsed);
-        if (Array.isArray(parsed)) {
-          setObjectManagement(parsed.map((obj: any) => obj?.object || obj));
+
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Extract the first object's "object" field as a string
+          setObjectName(parsed[0].object || "");
         }
       } catch (e) {
         console.error("Invalid objectManagementType format", e);
@@ -70,7 +73,7 @@ export default function DashboardSidebar() {
 
   return (
     <aside className="w-64 h-screen overflow-y-auto bg-gray-900 text-white p-4 space-y-6">
-      <div className="text-2xl font-bold mb-6">🌟 Dashboard object here</div>
+      <div className="text-2xl font-bold mb-6">🌟 Dashboard {}</div>
       <div className="text-sm text-gray-300 mb-4">Logged in as: {username}</div>
 
       <nav className="space-y-3">
@@ -117,7 +120,7 @@ export default function DashboardSidebar() {
           </SidebarGroup>
         )}
 
-         {objectManagement.includes("apartment") || userType === "admin" && (
+         {objectName.includes("apartment") || userType === "admin" && (
               <SidebarGroup
                 label="Apartment Management"
                 icon={<BedDouble size={16} />}
@@ -134,7 +137,7 @@ export default function DashboardSidebar() {
               </SidebarGroup>
             )}
 
-        {objectManagement.includes("hotel") || userType === "admin" && (
+        {objectName.includes("hotel") || userType === "admin" && (
           <SidebarGroup
             label="Hotel Management"
             icon={<Folder size={20} />}
@@ -144,7 +147,7 @@ export default function DashboardSidebar() {
            
 
            
-           {objectManagement.includes("hotel") || userType === "admin" && (
+           {objectName.includes("hotel") || userType === "admin" && (
             <SidebarGroup
               label="Hotel Room Management"
               icon={<Folder size={16} />}
@@ -162,7 +165,7 @@ export default function DashboardSidebar() {
           </SidebarGroup>
         )}
 
-        {objectManagement.includes("agence") || userType === "admin" && (
+        {objectName.includes("agence") || userType === "admin" && (
           <SidebarGroup
             label="Bus Agency Management"
             icon={<Folder size={20} />}
