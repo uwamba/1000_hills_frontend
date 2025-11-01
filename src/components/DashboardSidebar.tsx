@@ -140,8 +140,6 @@ export default function DashboardSidebar() {
 
             <SidebarSubItem href="/dashboard/apartment/add" label="Add New Apartment" icon={<BedDouble size={16} />} />
             <SidebarSubItem href="/dashboard/apartment/list" label="Apartment List" icon={<List size={16} />} />
-            <SidebarSubItem href="/dashboard/apartment/booking" label="Apartment Booking" icon={<CalendarCheck size={16} />} />
-            <SidebarSubItem href="/dashboard/apartment/payment" label="Apartment Payment" icon={<CreditCard size={16} />} />
           </SidebarGroup>
         )}
 
