@@ -73,7 +73,7 @@ export default function DashboardSidebar() {
 
   return (
     <aside className="w-64 h-screen overflow-y-auto bg-gray-900 text-white p-4 space-y-6">
-      <div className="text-2xl font-bold mb-6">🌟 Dashboard {}</div>
+      <div className="text-2xl font-bold mb-6">🌟 Dashboard</div>
       <div className="text-sm text-gray-300 mb-4">Logged in as: {username}</div>
 
       <nav className="space-y-3">

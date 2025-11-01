@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function DashboardSidebar() {
+export default function DashboardSidebar2() {
   const [openManagement, setOpenManagement] = useState(false);
   const [openHotel, setOpenHotel] = useState(false);
   const [openBus, setOpenBus] = useState(false);
