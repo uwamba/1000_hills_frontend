@@ -165,7 +165,7 @@ export default function DashboardSidebar() {
           </SidebarGroup>
         )}
 
-        {objectName.includes("agence") || userType === "admin" && (
+        {(objectName.includes("agence") || userType === "admin") && (
           <SidebarGroup
             label="Bus Agency Management"
             icon={<Folder size={20} />}
