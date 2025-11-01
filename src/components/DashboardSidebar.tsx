@@ -39,7 +39,7 @@ export default function DashboardSidebar() {
     const userData = localStorage.getItem("user");
     const storedUserType = localStorage.getItem("userType");
     const storedObjectManagement = localStorage.getItem("objectManagementType");
-  
+
 
     setUserType(storedUserType || "guest");
 
@@ -120,48 +120,63 @@ export default function DashboardSidebar() {
           </SidebarGroup>
         )}
 
-         {objectName.includes("apartment") || userType === "admin" && (
-              <SidebarGroup
-                label="Apartment Management"
-                icon={<BedDouble size={16} />}
-                open={openApartments}
-                toggle={() => setOpenApartments(!openApartments)}
-              >
-               
+        {(objectName.includes("apartment") || userType === "admin") && (
+          <SidebarGroup
+            label="Apartment Management"
+            icon={<BedDouble size={16} />}
+            open={openApartments}
+            toggle={() => setOpenApartments(!openApartments)}
+          >
+
+
+            {userType === "admin" && (
+              <>
                 <SidebarSubItem href="/dashboard/apartmentOwner/add" label="Add New Apartment Owner" icon={<BedDouble size={16} />} />
                 <SidebarSubItem href="/dashboard/apartmentOwner/list" label="Apartment Owner List" icon={<BedDouble size={16} />} />
-                <SidebarSubItem href="/dashboard/apartment/add" label="Add New Apartment" icon={<BedDouble size={16} />} />
-                <SidebarSubItem href="/dashboard/apartment/list" label="Apartment List" icon={<List size={16} />} />
-                <SidebarSubItem href="/dashboard/apartment/booking" label="Apartment Booking" icon={<CalendarCheck size={16} />} />
-                <SidebarSubItem href="/dashboard/apartment/payment" label="Apartment Payment" icon={<CreditCard size={16} />} />
-              </SidebarGroup>
+              </>
             )}
 
-        {objectName.includes("hotel") || userType === "admin" && (
+
+
+            <SidebarSubItem href="/dashboard/apartment/add" label="Add New Apartment" icon={<BedDouble size={16} />} />
+            <SidebarSubItem href="/dashboard/apartment/list" label="Apartment List" icon={<List size={16} />} />
+            <SidebarSubItem href="/dashboard/apartment/booking" label="Apartment Booking" icon={<CalendarCheck size={16} />} />
+            <SidebarSubItem href="/dashboard/apartment/payment" label="Apartment Payment" icon={<CreditCard size={16} />} />
+          </SidebarGroup>
+        )}
+
+        {(objectName.includes("hotel") || userType === "admin") && (
           <SidebarGroup
             label="Hotel Management"
             icon={<Folder size={20} />}
             open={openHotel}
             toggle={() => setOpenHotel(!openHotel)}
           >
-           
 
-           
-           {objectName.includes("hotel") || userType === "admin" && (
-            <SidebarGroup
-              label="Hotel Room Management"
-              icon={<Folder size={16} />}
-              open={openRoom}
-              toggle={() => setOpenRoom(!openRoom)}
-            >
-              <SidebarSubItem href="/dashboard/hotel/add" label="Add New Hotel" icon={<BedDouble size={16} />} />
-               <SidebarSubItem href="/dashboard/hotel/list" label="Hotel List" icon={<List size={16} />} />
-              <SidebarSubItem href="/dashboard/room/add" label="Add New Room" icon={<BedDouble size={16} />} />
-              <SidebarSubItem href="/dashboard/room/list" label="Hotel Room List" icon={<List size={16} />} />
-              <SidebarSubItem href="/dashboard/room/payment" label="Hotel Room Payment" icon={<CreditCard size={16} />} />
-              <SidebarSubItem href="/dashboard/room/booking" label="Hotel Room Booking" icon={<CalendarCheck size={16} />} />
-            </SidebarGroup>
-          )}
+
+
+            {(objectName.includes("hotel") || userType === "admin") && (
+              <SidebarGroup
+                label="Hotel Room Management"
+                icon={<Folder size={16} />}
+                open={openRoom}
+                toggle={() => setOpenRoom(!openRoom)}
+              >
+
+                {userType === "admin" && (
+                  <>
+                    <SidebarSubItem href="/dashboard/hotel/add" label="Add New Hotel" icon={<BedDouble size={16} />} />
+                    <SidebarSubItem href="/dashboard/hotel/list" label="Hotel List" icon={<List size={16} />} />
+                  </>
+                )}
+
+
+                <SidebarSubItem href="/dashboard/room/add" label="Add New Room" icon={<BedDouble size={16} />} />
+                <SidebarSubItem href="/dashboard/room/list" label="Hotel Room List" icon={<List size={16} />} />
+                <SidebarSubItem href="/dashboard/room/payment" label="Hotel Room Payment" icon={<CreditCard size={16} />} />
+                <SidebarSubItem href="/dashboard/room/booking" label="Hotel Room Booking" icon={<CalendarCheck size={16} />} />
+              </SidebarGroup>
+            )}
           </SidebarGroup>
         )}
 
@@ -174,16 +189,20 @@ export default function DashboardSidebar() {
           >
             <SidebarSubItem href="/dashboard/bus/layout-add" label="Add Bus Layout" icon={<Bus size={16} />} />
             <SidebarSubItem href="/dashboard/bus/layout-list" label="Bus Layout List" icon={<List size={16} />} />
-            <SidebarSubItem href="/dashboard/agency/add" label="Add New Agency" icon={<BedDouble size={16} />} />
-            <SidebarSubItem href="/dashboard/agency/list" label="Agency List" icon={<List size={16} />} />
             <SidebarSubItem href="/dashboard/bus/add" label="Add new bus" icon={<Bus size={16} />} />
             <SidebarSubItem href="/dashboard/bus/list" label="Bus list" icon={<List size={16} />} />
-            <SidebarSubItem href="/dashboard/bus/booking" label="Bus Booking" icon={<CalendarCheck size={16} />} />
-            <SidebarSubItem href="/dashboard/bus/payment" label="View payments" icon={<CreditCard size={16} />} />
             <SidebarSubItem href="/dashboard/Journey/Add" label="Add new Journey" icon={<CalendarCheck size={16} />} />
             <SidebarSubItem href="/dashboard/Journey/list" label="Journey list" icon={<List size={16} />} />
+
+            {userType === "admin" && (
+              <>
+                <SidebarSubItem href="/dashboard/agency/add" label="Add New Agency" icon={<BedDouble size={16} />} />
+                <SidebarSubItem href="/dashboard/agency/list" label="Agency List" icon={<List size={16} />} />
+              </>
+            )}
           </SidebarGroup>
-        ) }
+        )}
+
 
         <SidebarGroup
           label="Booking Management"
@@ -196,15 +215,15 @@ export default function DashboardSidebar() {
           <SidebarSubItem href="/dashboard/booking/tickets" label="Bus Tickets Booking" icon={<Calendar size={16} />} />
           <SidebarSubItem href="/dashboard/booking/ticket" label="Events Booking" icon={<Calendar size={16} />} />
         </SidebarGroup>
-         {userType === "admin" && (
-        <SidebarGroup
-          label="Payments Management"
-          icon={<Folder size={20} />}
-          open={openPayment}
-          toggle={() => setOpenPayment(!openPayment)}
-        >
-          <SidebarSubItem href="/dashboard/payments" label="Payments" icon={<DollarSign size={16} />} />
-        </SidebarGroup>
+        {userType === "admin" && (
+          <SidebarGroup
+            label="Payments Management"
+            icon={<Folder size={20} />}
+            open={openPayment}
+            toggle={() => setOpenPayment(!openPayment)}
+          >
+            <SidebarSubItem href="/dashboard/payments" label="Payments" icon={<DollarSign size={16} />} />
+          </SidebarGroup>
         )}
       </nav>
     </aside>
